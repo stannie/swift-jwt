@@ -3,7 +3,7 @@
 //  
 //  Stan P. van de Burgt
 //  stan@vandeburgt.com
-//
+//  (c) 2015
 
 import Foundation
 

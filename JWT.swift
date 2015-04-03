@@ -10,34 +10,27 @@ import Foundation
 public class JWT {
     // https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-4
     // base class; supports alg: none, HS256, HS384, HS512
-    var alg = "none"
-    var header: [String: AnyObject] = ["alg": "none"] {
-        // when header property is set directly, keep track of the "alg" field
+
+    public var header: [String: AnyObject] = ["alg": "none"] {
         didSet {
-            if let alg = header["alg"] as? String {
-                self.alg = alg
-            }
-            else {
-                self.alg = "none"   // if not present, handle (and insert) as alg: none
-                self.header["alg"] = "none"
+            if header["alg"] as? String == nil {
+                self.header["alg"] = "none"     // if not present, insert alg
             }
         }
     }
-    var body: [String: AnyObject] = [:]
+    public var body: [String: AnyObject] = [:]
+    var blacklist: [String] = []                // algorithms that are deemed invalid
 
-    public init() {
-        // defaults above are fine
+    public init(blacklist: [String] = []) {
+        self.blacklist = blacklist
     }
 
-    public init(header: [String: AnyObject], body: [String: AnyObject]) {
+    public init(header: [String: AnyObject], body: [String: AnyObject], blacklist: [String] = []) {
         self.header = header
         self.body = body
-        if let alg = header["alg"] as? String {
-            self.alg = alg
-        }
-        else {
-            self.alg = "none"   // if not present, handle (and insert) as alg: none
-            self.header["alg"] = "none"
+        self.blacklist = blacklist
+        if header["alg"] as? String == nil {
+            self.header["alg"] = "none"         // if not present, insert alg (copy of didSet{} ad init does not trigger it)
         }
     }
 
@@ -50,7 +43,7 @@ public class JWT {
         // split into parts, header, body, optional signature
         let parts: [String] = jwt.componentsSeparatedByString(".")
         switch parts.count {
-        case 2: sig = ""
+        case 2: break
         case 3: sig = parts[2]
         default:
             if error != nil {
@@ -67,6 +60,13 @@ public class JWT {
         else {
             return false
         }
+        // check whether alg parameter is on blacklist
+        let algorithm = header["alg"] as? String
+        for alg in self.blacklist {
+            if alg == algorithm {
+                return false
+            }
+        }
         // decode the body (a URL-safe base 64 encoded JSON dict) from the 2nd part
         if parts.count > 1 {
             let body_data = parts[1].base64SafeUrlDecode()
@@ -82,9 +82,12 @@ public class JWT {
             // verify the signature, a URL-safe base64 encoded string
             let hdr_body: String = parts[0] + "." + parts[1] // header & body of a JWT
             let data = hdr_body.dataUsingEncoding(NSUTF8StringEncoding)!
-
-            if !self.verify(data, signature: sig, algorithm: self.alg, key: key) {
-                return false  // TODO: populate NSError
+            if self.verify_signature(data, signature: sig, algorithm: algorithm!, key: key) == false {
+                return false // TODO: populate NSError
+            }
+            // verify content fields
+            if self.verify_content() == false {
+                return false
             }
         }
         return true
@@ -109,7 +112,8 @@ public class JWT {
             if let b = NSJSONSerialization.dataWithJSONObject(self.body, options: nil, error: error) {
                 data = data + "." + b.base64SafeUrlEncode()
                 let data_raw = data.dataUsingEncoding(NSUTF8StringEncoding)!
-                if let sig = self.signature(data_raw, algorithm: self.alg, key: key) {
+                let algorithm = header["alg"] as? String
+                if let sig = self.signature(data_raw, algorithm: algorithm!, key: key) {
                     return data + "." + sig
                 }
             }
@@ -123,7 +127,15 @@ public class JWT {
         return dumps(key_raw, error: error)
     }
 
-    public func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
+    public func setnonce(length: Int = 32) -> String {
+        var bytes = NSMutableData(length: length)!
+        SecRandomCopyBytes(kSecRandomDefault, UInt(length), UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
+        let jti = bytes.base64SafeUrlEncode()
+        self.body["jti"] = jti
+        return jti
+    }
+    
+    func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
         switch algorithm {
         case "none":  return ""
         case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key)
@@ -133,14 +145,33 @@ public class JWT {
         }
     }
 
-    public func verify(msg: NSData, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
+    func verify_signature(msg: NSData, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
+        if key == nil && algorithm != "none" {
+            return false
+        }
         switch algorithm {
-        case "none":  return key == nil // if "none" then the key shall be nil
-        case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key!) == signature // TODO: key! => key...
+        case "none":  return signature == "" // if "none" then the signature shall be empty
+        case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key!) == signature
         case "HS384": return msg.base64digest(HMACAlgorithm.SHA384, key: key!) == signature
         case "HS512": return msg.base64digest(HMACAlgorithm.SHA512, key: key!) == signature
         default:      return false
         }
+    }
+
+    func verify_content() -> Bool {
+        let date = NSDate()
+        let now = UInt(date.timeIntervalSince1970)
+
+        if let exp = self.body["exp"] as? UInt {
+            if now > exp { return false }
+        }
+        if let nbf = self.body["nbf"] as? UInt {
+            if now < nbf { return false }
+        }
+        if let iat = self.body["iat"] as? UInt {
+            if now < iat { return false }
+        }
+        return true
     }
 }
 
@@ -149,7 +180,7 @@ public class JWT {
 
 public class JWTNaCl: JWT {
 
-    override public func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
+    override func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
         if algorithm == "Ed25519" {
             return msg.nacl_signature(key)
         }
@@ -158,7 +189,7 @@ public class JWTNaCl: JWT {
         }
     }
 
-    override public func verify(msg: NSData, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
+    override func verify_signature(msg: NSData, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
         if algorithm == "Ed25519" {
             if key == nil {
                 // use the "kid" field as base64 key string as key if no key provided.
@@ -171,16 +202,35 @@ public class JWTNaCl: JWT {
             }
         }
         else {
-            return super.verify(msg, signature: signature, algorithm: algorithm, key: key)
+            return super.verify_signature(msg, signature: signature, algorithm: algorithm, key: key)
         }
         return false
+    }
+
+    override func verify_content() -> Bool {
+        if let kid = self.header["kid"] as? String {
+            let pk = kid.base64SafeUrlDecode(nil)
+            if pk == nil || pk!.length != 32 {
+                return false
+            }
+        }
+        else {
+            return false // kid is not optional
+        }
+        if let sub = self.body["sub"] as? String {
+            let id = sub.base64SafeUrlDecode(nil)
+            if id == nil || id!.length != 32 {
+                return false
+            }
+        }
+        return super.verify_content() // run the parent tests too
     }
 }
 
 // MARK: - base64 extensions
 
 extension String {
-    func base64SafeUrlDecode() -> NSData {
+    func base64SafeUrlDecode() -> NSData { // ! ?
         return self.base64SafeUrlDecode(nil)
     }
     
@@ -194,7 +244,7 @@ extension String {
         case 0: break; // No pad chars in this case
         case 2: s += "=="; break; // Two pad chars
         case 3: s += "="; break; // One pad char
-        default: println("Illegal base64url string!"); return nil
+        default: return nil
         }
         
         return NSData(base64EncodedString: s, options: options)!
@@ -303,103 +353,4 @@ extension NSData {
     }
 }
 
-// TODO: Remove all below
-
-//    // helper function for base64 strings as key == CANNOT DO FOR FIRST PARAMETER
-//    public func dumps(b64key: String, error: NSErrorPointer = nil) -> String? {
-//        let key_raw = b64key.base64SafeUrlDecode()
-//        return dumps(key_raw, error: error)
-//    }
-
-//    // drop this one? (string key)
-//    func base64digest(algorithm: HMACAlgorithm, key: String) -> String! {
-//        let data = self.bytes
-//        let dataLen = UInt(self.length)
-//        let digestLen = algorithm.digestLength()
-//        let result = UnsafeMutablePointer<CUnsignedChar>.alloc(digestLen)
-//        let keyStr = key.cStringUsingEncoding(NSUTF8StringEncoding)
-//        let keyLen = UInt(key.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-//
-//        CCHmac(algorithm.toCCEnum(), keyStr!, keyLen, data, dataLen, result)
-//        let hdata = NSData(bytes: result, length: digestLen)
-//        result.destroy()
-//
-//        return hdata.base64SafeUrlEncode()
-//    }
-
-//public func b64d(s: String) -> NSData {
-//    return s.base64SafeUrlDecode()
-//}
-
-
-//        let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
-//        let msg_data = msg.dataUsingEncoding(NSUTF8StringEncoding)!
-
-//            let msg_data = msg.dataUsingEncoding(NSUTF8StringEncoding)!
-//            return msg_data.nacl_verify(signature, key: key!)
-
-//    // drop?
-//    public func verify(msg: String, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
-//        switch algorithm {
-//        case "none":
-//            return key == nil // if "none" the key shall be nil
-//        case "HS256":
-//            return msg.base64digest(HMACAlgorithm.SHA256, key: "secret") == ""
-//        case "HS384":
-//            return msg.base64digest(HMACAlgorithm.SHA384, key: "secret") == ""
-//        case "HS512":
-//            return msg.base64digest(HMACAlgorithm.SHA512, key: "secret") == ""
-//        default:
-//            return false
-//        }
-//    }
-
-//    public func signature(msg: String, algorithm: String, key: NSData) -> String? {
-//        let msg_data = msg.dataUsingEncoding(NSUTF8StringEncoding)!
-//        return signature(msg_data, algorithm: algorithm, key: key)
-//        let key_raw = key //.dataUsingEncoding(NSUTF8StringEncoding)!
-//        let msg_data = msg.dataUsingEncoding(NSUTF8StringEncoding)!
-//        if let sig = sodium?.sign.signature(msg_data, secretKey: key_raw) {
-//            return sig.base64SafeUrlEncode()
-//        }
-//        return msg.base64digest(HMACAlgorithm.SHA256, key: "secret") // for the HMAC ones only!
-//    }
-
-//extension String {
-//    
-//    // no need for this one... creates a hex digest
-//    func digest(algorithm: HMACAlgorithm, key: String) -> String! {
-//        let str = self.cStringUsingEncoding(NSUTF8StringEncoding)
-//        let strLen = UInt(self.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-//        let digestLen = algorithm.digestLength()
-//        let result = UnsafeMutablePointer<CUnsignedChar>.alloc(digestLen)
-//        let keyStr = key.cStringUsingEncoding(NSUTF8StringEncoding)
-//        let keyLen = UInt(key.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-//        
-//        CCHmac(algorithm.toCCEnum(), keyStr!, keyLen, str!, strLen, result)
-//        var hash = NSMutableString()
-//        for i in 0..<digestLen {
-//            hash.appendFormat("%02x", result[i])
-//        }
-//        result.destroy()
-//        
-//        return String(hash)
-//    }
-//    
-//    // may drop this to, and only use the NSData extension
-//    func base64digest(algorithm: HMACAlgorithm, key: String) -> String! {
-//        let str = self.cStringUsingEncoding(NSUTF8StringEncoding)
-//        let strLen = UInt(self.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-//        let digestLen = algorithm.digestLength()
-//        let result = UnsafeMutablePointer<CUnsignedChar>.alloc(digestLen)
-//        let keyStr = key.cStringUsingEncoding(NSUTF8StringEncoding)
-//        let keyLen = UInt(key.lengthOfBytesUsingEncoding(NSUTF8StringEncoding))
-//        
-//        CCHmac(algorithm.toCCEnum(), keyStr!, keyLen, str!, strLen, result)
-//        let hdata = NSData(bytes: result, length: digestLen)
-//        result.destroy()
-//        
-//        return hdata.base64SafeUrlEncode()
-//    }
-//}
-
+// END

@@ -15,6 +15,7 @@ public class JWT {
     // TODO: add support for PS256, PS384, PS512
 
     public var header: [String: AnyObject] = ["alg": "none", "typ": "JWT", ] {
+        // JWT header
         didSet {
             if header["alg"] as? String == nil {
                 self.header["alg"] = "none"     // if not present, insert alg
@@ -25,17 +26,17 @@ public class JWT {
             }
         }
     }
-    public var body: [String: AnyObject] = [:]  // TODO: better use whitelist / allowed_algs / algoritms
+    public var body: [String: AnyObject] = [:]  // JWT payload
     var algorithms: [String] = []               // algorithms that are valid on loads(), dumps() and setting 'alg' header
 
     public init(algorithms: [String]) {
-        self.algorithms = algorithms
+        self.algorithms = algorithms            // TODO: check if algoritms are implemented()
     }
 
     public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]) {
         self.header = header
         self.body = body
-        self.algorithms = algorithms
+        self.algorithms = algorithms            // TODO: check if algoritms are implemented()
         if header["alg"] as? String == nil {
             self.header["alg"] = "none"         // if not present, insert 'alg' (copy of didSet{} ad init does not trigger it)
         }
@@ -115,6 +116,7 @@ public class JWT {
     }
 
     public func dumps(key: NSData, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
+        // create a JWT string from this object
         // TODO: some way to indicate that some fields should be generated, next to jti; e.g. nbf and iat
         var data = ""
         var payload = self.body
@@ -149,6 +151,16 @@ public class JWT {
 
     func whitelisted(algorithm: String?) -> Bool {
         for alg in self.algorithms {
+            if alg == algorithm {
+                return true
+            }
+        }
+        return false
+    }
+
+    func implemented(algorithm: String?) -> Bool {
+        let algorithms = ["none", "HS256", "HS384", "HS512"]
+        for alg in algorithms {
             if alg == algorithm {
                 return true
             }
@@ -220,6 +232,16 @@ public class JWT {
 // TODO: move following class and nacl_* extentions to NSData to JWTNaCl.swift ?
 
 public class JWTNaCl: JWT {
+
+    override func implemented(algorithm: String?) -> Bool {
+        let algorithms = ["Ed25519"]
+        for alg in algorithms {
+            if alg == algorithm {
+                return true
+            }
+        }
+        return super.implemented(algorithm) // not implemented here, so try parent
+    }
 
     override func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
         if algorithm == "Ed25519" {

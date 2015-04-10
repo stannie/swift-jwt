@@ -1,5 +1,6 @@
 //
 //  JWT.swift
+// TODO: rename to SwiftJWT
 //  
 //  Stan P. van de Burgt
 //  stan@vandeburgt.com
@@ -11,25 +12,31 @@ import Foundation
 public class JWT {
     // https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-4
     // base class; supports alg: none, HS256, HS384, HS512
+    // TODO: add support for RS256, RS384, RS512
+    // TODO: add support for PS256, PS384, PS512
 
     public var header: [String: AnyObject] = ["alg": "none", "typ": "JWT", ] {
         didSet {
             if header["alg"] as? String == nil {
                 self.header["alg"] = "none"     // if not present, insert alg
             }
+            if !self.whitelisted(header["alg"] as? String) {
+                // TODO: what to do when the alg is not whitelisted? We need Exceptions!
+                self.header["alg"] = oldValue["alg"] // TODO: or better: fail on loads?
+            }
         }
     }
     public var body: [String: AnyObject] = [:]  // TODO: better use whitelist / allowed_algs / algoritms
-    var blacklist: [String] = []                // algorithms that are deemed invalid
+    var algorithms: [String] = []               // algorithms that are valid on loads(), dumps() and setting 'alg' header
 
-    public init(blacklist: [String] = []) {
-        self.blacklist = blacklist
+    public init(algorithms: [String]) {
+        self.algorithms = algorithms
     }
 
-    public init(header: [String: AnyObject], body: [String: AnyObject], blacklist: [String] = []) {
+    public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]) {
         self.header = header
         self.body = body
-        self.blacklist = blacklist
+        self.algorithms = algorithms
         if header["alg"] as? String == nil {
             self.header["alg"] = "none"         // if not present, insert 'alg' (copy of didSet{} ad init does not trigger it)
         }
@@ -38,7 +45,7 @@ public class JWT {
         }
     }
 
-    public func loads(jwt: String, key: NSData?, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
+    public func loads(jwt: String, key: NSData? = nil, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
         // load a JWT string into this object
         self.header = [:]
         self.body = [:]
@@ -62,15 +69,12 @@ public class JWT {
             self.header = dictionary // also sets self.alg and value for "alg" key by the didSet{} observer
         }
         else {
-            return false
+            return false // TODO: populate NSError
         }
-        // check whether alg parameter is on blacklist
-        // TODO: change to whitelist
+        // check whether alg parameter is on algorithms whitelist
         let algorithm = header["alg"] as? String
-        for alg in self.blacklist {
-            if alg == algorithm {
-                return false
-            }
+        if !self.whitelisted(algorithm) {
+            return false // TODO: populate NSError
         }
         // decode the body (a URL-safe base 64 encoded JSON dict) from the 2nd part
         if parts.count > 1 {
@@ -142,6 +146,15 @@ public class JWT {
     public func dumps(key: String, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
         let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
         return dumps(key_raw, jti_len: jti_len, error: error)
+    }
+
+    func whitelisted(algorithm: String?) -> Bool {
+        for alg in self.algorithms {
+            if alg == algorithm {
+                return true
+            }
+        }
+        return false
     }
 
     func signature(msg: NSData, algorithm: String, key: NSData) -> String? {

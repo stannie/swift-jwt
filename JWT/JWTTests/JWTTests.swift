@@ -25,7 +25,7 @@ class JWTTests: XCTestCase {
     func test_HS256_JWT_from_dicts() {
         // This is an example of a functional test case.
         let expected_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJoZWxsbyI6IndvcmxkIn0.lnneNaoem98xYFES3mi2CJJjnMONuWAu-FTWB3XJN14"
-        let jwt = JWT(header: ["alg":"HS256"], body: ["hello":"world"])
+        let jwt = JWT(header: ["alg":"HS256"], body: ["hello":"world"], algorithms: ["HS512","RS512"])
         let s = jwt.dumps("secret", jti_len: 0) // without jti to enable replay
         XCTAssert(s != nil, "JWT.dumps() failed")
         XCTAssert(s! == expected_jwt, "JWT.dumps() unexpected jwt")
@@ -35,7 +35,7 @@ class JWTTests: XCTestCase {
         let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiWE43VnBFWDF1Q3h4aHZ3VXVhY1lodVU5dDZ1eGdMYWhSaUxlU0VIRU5payJ9.eyJmb28iOiJiYXIifQ.a2dDcKXByKxiouOLnXUm7YUKHMGOU3yn_g91C90e8YmKjlF1_9ylAKukfMm6Y6WS3dZp2ysaglzzTnVxnRYyDQ"
         let sk = "YHWUUc0P6SY46WaDdnssE8NpFsQQxJrvmdOrpU9X0wU"
         let pk = "XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"
-        let jwt = JWTNaCl()
+        let jwt = JWTNaCl(algorithms: ["Ed25519"])
         XCTAssert(jwt.loads(jwt_ed, b64key: pk, verify: true), "loading a NaCl signed JWT and specified public (verification) key")
         XCTAssert(jwt.loads(jwt_ed, key: nil, verify: true), "loading a NaCl signed JWT and with implicit (verification) key 'kid'")
         let kid = jwt.header["kid"] as? String
@@ -44,33 +44,33 @@ class JWTTests: XCTestCase {
 
     func test_HS256_JWT_from_string() {
         let jwt_hs256 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEifQ.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOi8vNS1kb3QtYXV0aGVudGlxaW8uYXBwc3BvdC5jb20iLCJzdWIiOiJhQkdvd1BIY0l0cG92ZVZ6cnJRc1NuazY1Y19xaEt2ZmpkLTR3eVBVZlVRIiwidHlwZSI6Im1vYmlsZSJ9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
-        let jwt = JWT()
+        let jwt = JWT(algorithms: ["HS256","HS512","RS512"])
         XCTAssert(jwt.loads(jwt_hs256, key: "secret", verify: true), "loading a HS256 signed JWT and specified (verification) hash")
         XCTAssert(jwt.body["phone_number"] as? String == "+306947898605", "wrong 'phone' scope in loaded JWT")
-        var jwtn = JWTNaCl()
+        var jwtn = JWTNaCl(algorithms: ["HS512","RS512"])
         XCTAssert(jwt.loads(jwt_hs256, key: "secret", verify: true), "loading a HS256 signed JWT in a NaCl subclass should work too")
     }
 
     func test_random_string_as_JWT() {
         var error: NSError?
-        var jwt = JWT()
+        var jwt = JWT(algorithms: ["HS512","RS512"])
         XCTAssert(jwt.loads("randomstring", key: nil, verify: false, error: &error) == false, "random string should not load")
         XCTAssert(jwt.body.count == 0, "loading garbage should leave body empty")
     }
 
     func test_alg_none_with_sig() {
         let jwt_none_sig = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
-        var jwt = JWT()
+        var jwt = JWT(algorithms: ["none","HS512","RS512"])
         XCTAssert(jwt.loads(jwt_none_sig, key: nil, verify: true) == false, "alg=none with a signature is not valid")
-        jwt = JWT(blacklist: ["none"])
-        XCTAssert(jwt.loads(jwt_none_sig, key: nil, verify: false) == false, "none is on blacklist")
+        jwt = JWT(algorithms: ["HS512","RS512"])
+        XCTAssert(jwt.loads(jwt_none_sig, key: nil, verify: false) == false, "none is not on whitelist")
     }
 
     func test_timestamps() {
         let date = NSDate()
         let now = UInt(date.timeIntervalSince1970)
-        let jwt = JWT()
-        var jwt_dated = JWT()
+        let jwt = JWT(algorithms: ["none","HS512","RS512"])
+        var jwt_dated = JWT(algorithms: ["none","HS512","RS512"])
         var s = ""
         jwt_dated.body["exp"] = now-100
         s = jwt_dated.dumps("")!
@@ -101,12 +101,12 @@ class JWTTests: XCTestCase {
         let kp = sodium.sign.keyPair(seed: seed)
         // This is an example of a functional test case.
         XCTAssert(kp != nil, "Key pair generation")
-        var jwt = JWTNaCl()
+        var jwt = JWTNaCl(algorithms: ["Ed25519"])
         XCTAssert(jwt.loads(jwt_ed, key: kp!.publicKey, verify: true) == false, "NaCl JWT should not validate with wrong key")
-        // but is stiil loaded
+        // but is still loaded (DO WE WANT THAT?)
         let jwt_str = jwt.dumps(kp!.secretKey)! // valid Ed25519 signed token
         jwt.header = [:]
-        XCTAssert(jwt.header["alg"] as? String == "none", "after reset of header, alg=none")
+        XCTAssert(jwt.header["alg"] as? String == "Ed25519", "after reset of header, alg should be unchanged")
         jwt.body = [:]
         XCTAssert(jwt.loads(jwt_str, key: nil, verify: true) == false, "verify a generated JWT to kid when signed with fresh key")
         XCTAssert(jwt.loads(jwt_str, key: kp!.publicKey, verify: true), "verify a generated JWT with its public key")
@@ -115,7 +115,7 @@ class JWTTests: XCTestCase {
     func testPerformanceVerify() {
         // This is an example of a performance test case.
         let jwt_str = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiYUJHb3dQSGNJdHBvdmVWenJyUXNTbms2NWNfcWhLdmZqZC00d3lQVWZVUSJ9.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOlwvXC81LWRvdC1hdXRoZW50aXFpby5hcHBzcG90LmNvbSIsInN1YiI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEiLCJ0eXBlIjoibW9iaWxlIn0.kD4YcuAb7v3cxlRZTrUbew1lWiY3G8uEmRguizy1KJs"
-        var jwt = JWTNaCl()
+        var jwt = JWTNaCl(algorithms: ["none","HS512","RS512"])
         self.measureBlock() {
             let ok = jwt.loads(jwt_str, key: nil, verify: true)
         }

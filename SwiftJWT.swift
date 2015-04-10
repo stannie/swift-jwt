@@ -1,7 +1,6 @@
 //
 //  JWT.swift
-// TODO: rename to SwiftJWT
-//  
+//
 //  Stan P. van de Burgt
 //  stan@vandeburgt.com
 //  (c) RoundZero 2015

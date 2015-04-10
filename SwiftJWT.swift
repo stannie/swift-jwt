@@ -146,11 +146,8 @@ public class JWT {
     }
 
     // helper function for plain strings as key
-    public func dumps(key: String?, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
-        var key_raw: NSData? = nil
-        if let key_str = key {
-            key_raw = key_str.dataUsingEncoding(NSUTF8StringEncoding)!
-        }
+    public func dumps(key: String, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
+        let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
         return dumps(key: key_raw, jti_len: jti_len, error: error)
     }
 

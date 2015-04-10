@@ -19,7 +19,7 @@ public class JWT {
             }
         }
     }
-    public var body: [String: AnyObject] = [:]  // TODO: better use whitelist / allowed_algs
+    public var body: [String: AnyObject] = [:]  // TODO: better use whitelist / allowed_algs / algoritms
     var blacklist: [String] = []                // algorithms that are deemed invalid
 
     public init(blacklist: [String] = []) {
@@ -112,6 +112,7 @@ public class JWT {
     }
 
     public func dumps(key: NSData, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
+        // TODO: some way to indicate that some fields should be generated, next to jti; e.g. nbf and iat
         var data = ""
         var payload = self.body
         // if 'jti' (the nonce) not present in body, and it is requested (jti_len > 0), set one
@@ -150,6 +151,10 @@ public class JWT {
         case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key)
         case "HS384": return msg.base64digest(HMACAlgorithm.SHA384, key: key)
         case "HS512": return msg.base64digest(HMACAlgorithm.SHA512, key: key)
+        case "RS256": return msg.rsa_signature(HMACAlgorithm.SHA256, key: key)
+        case "RS384": return msg.rsa_signature(HMACAlgorithm.SHA384, key: key)
+        case "RS512": return msg.rsa_signature(HMACAlgorithm.SHA512, key: key)
+        // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
         default:      return nil
         }
     }
@@ -164,10 +169,16 @@ public class JWT {
         case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key!) == signature
         case "HS384": return msg.base64digest(HMACAlgorithm.SHA384, key: key!) == signature
         case "HS512": return msg.base64digest(HMACAlgorithm.SHA512, key: key!) == signature
+        case "RS256": return msg.rsa_verify(HMACAlgorithm.SHA256, signature: signature, key: key!)
+        case "RS384": return msg.rsa_verify(HMACAlgorithm.SHA384, signature: signature, key: key!)
+        case "RS512": return msg.rsa_verify(HMACAlgorithm.SHA512, signature: signature, key: key!)
+        // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
         default:      return false
         }
     }
 
+    // TODO: some way to enforce that e.g. iat and nbf are present
+    // TODO: verification of iss and aud when given in loads()
     func verify_content() -> Bool {
         // internal function to verify the content (header and body) parts of a JWT
         let date = NSDate()
@@ -291,6 +302,7 @@ extension NSData {
 import CommonCrypto
 
 // See: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost) on HMAC signing.
+// note that MD5, SHA1 and SHA224 are not used as JWT algorithms
 
 enum HMACAlgorithm {
     case MD5, SHA1, SHA224, SHA256, SHA384, SHA512
@@ -377,10 +389,10 @@ extension NSData {
     // TODO: finalize the next 2 functions to implement RSnnn algorithms, for nnn = 224 or 256 or 384 or 512
     // based on http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
 
-    // TODO: add an algorithm parameter
-    func rsa_signature(key: NSData) -> NSData! {
+    // TODO: use an algorithm parameter
+    func rsa_signature(algorithm: HMACAlgorithm, key: NSData) -> String! {
         // TODO: how to get to the SecKey part / version of the private key, if given as NSData
-        let key: SecKey? = nil
+        let privkey: SecKey? = nil
         let msg = UnsafePointer<UInt8>(self.bytes)
         let msglen = UInt(self.length)
 
@@ -392,7 +404,7 @@ extension NSData {
         let siglen = UnsafeMutablePointer<UInt>.alloc(1) // correct? and initialize to CC_SHA256_DIGEST_LENGTH ?
 
         // TODO: fix error in next line, call to SecKeyRawSign
-        //let status = SecKeyRawSign(key: key!, padding: kSecPaddingPKCS1SHA256, dataToSign: msg, dataToSignLen: msglen, sig: sigbuf, sigLen: siglen)
+        //let status = SecKeyRawSign(key: privkey!, padding: kSecPaddingPKCS1SHA256, dataToSign: msg, dataToSignLen: msglen, sig: sigbuf, sigLen: siglen)
 
         //OSStatus SecKeyRawSign(
         //    SecKeyRef           privKey,
@@ -402,11 +414,11 @@ extension NSData {
         //    uint8_t             *sig,
         //    size_t              *sigLen)
 
-        return sig
+        return sig.base64SafeUrlEncode()
     }
 
-    func rsa_verify(signature: String, key: NSData) -> Bool {
-        let key: SecKey? = nil
+    func rsa_verify(algorithm: HMACAlgorithm, signature: String, key: NSData) -> Bool {
+        let pubkey: SecKey? = nil
         let msg = UnsafePointer<UInt8>(self.bytes)
         let msglen = UInt(self.length)
 
@@ -416,67 +428,14 @@ extension NSData {
         var sig = NSMutableData(length: Int(CC_SHA256_DIGEST_LENGTH))!
         let sig_raw = signature.base64SafeUrlDecode()
         var sigbuf = UnsafeMutablePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) ?
-        let siglen = UInt(sig_raw.length) // or pointer ?
+        let siglen = UInt(sig_raw.length)
 
         // TODO: fix error in next line, call to SecKeyRawSign
-        // let status = SecKeyRawVerify(key: key!, padding: kSecPaddingPKCS1SHA256, signedData: msg, signedDataLen: msglen, sig: sigbuf, sigLen: siglen)
+        // let status = SecKeyRawVerify(key: pubkey!, padding: kSecPaddingPKCS1SHA256, signedData: msg, signedDataLen: msglen, sig: sigbuf, sigLen: siglen)
         // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: UInt, sig: UnsafePointer<UInt8>, sigLen: UInt)
 
-        return false
+        return false // status == errSecSuccess
     }
 }
-
-// example code from http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
-
-//NSData* PKCSSignBytesSHA256withRSA(NSData* plainData, SecKeyRef privateKey)
-//{
-//    size_t signedHashBytesSize = SecKeyGetBlockSize(privateKey);
-//    uint8_t* signedHashBytes = malloc(signedHashBytesSize);
-//    memset(signedHashBytes, 0x0, signedHashBytesSize);
-//
-//    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
-//    uint8_t* hashBytes = malloc(hashBytesSize);
-//    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
-//        return nil;
-//    }
-//
-//    SecKeyRawSign(privateKey,
-//        kSecPaddingPKCS1SHA256,
-//        hashBytes,
-//        hashBytesSize,
-//        signedHashBytes,
-//        &signedHashBytesSize);
-//
-//    NSData* signedHash = [NSData dataWithBytes:signedHashBytes
-//        length:(NSUInteger)signedHashBytesSize];
-//
-//    if (hashBytes)
-//    free(hashBytes);
-//    if (signedHashBytes)
-//    free(signedHashBytes);
-//
-//    return signedHash;
-//}
-
-//BOOL PKCSVerifyBytesSHA256withRSA(NSData* plainData, NSData* signature, SecKeyRef publicKey)
-//{
-//    size_t signedHashBytesSize = SecKeyGetBlockSize(publicKey);
-//    const void* signedHashBytes = [signature bytes];
-//
-//    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
-//    uint8_t* hashBytes = malloc(hashBytesSize);
-//    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
-//        return nil;
-//    }
-//
-//    OSStatus status = SecKeyRawVerify(publicKey,
-//        kSecPaddingPKCS1SHA256,
-//        hashBytes,
-//        hashBytesSize,
-//        signedHashBytes,
-//        signedHashBytesSize);
-//
-//    return status == errSecSuccess;
-//}
 
 // END

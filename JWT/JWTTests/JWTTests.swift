@@ -25,7 +25,7 @@ class JWTTests: XCTestCase {
     func test_HS256_JWT_from_dicts() {
         // This is an example of a functional test case.
         let expected_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJoZWxsbyI6IndvcmxkIn0.lnneNaoem98xYFES3mi2CJJjnMONuWAu-FTWB3XJN14"
-        let jwt = JWT(header: ["alg":"HS256"], body: ["hello":"world"], algorithms: ["HS512","RS512"])
+        let jwt = JWT(header: ["alg":"HS256"], body: ["hello":"world"], algorithms: ["HS256","HS512","RS512"])
         let s = jwt.dumps("secret", jti_len: 0) // without jti to enable replay
         XCTAssert(s != nil, "JWT.dumps() failed")
         XCTAssert(s! == expected_jwt, "JWT.dumps() unexpected jwt")
@@ -73,22 +73,22 @@ class JWTTests: XCTestCase {
         var jwt_dated = JWT(algorithms: ["none","HS512","RS512"])
         var s = ""
         jwt_dated.body["exp"] = now-100
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == false, "exp in past \(s)")
         jwt_dated.body["exp"] = now+100 // and leave it there for next tests
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == true, "exp in future \(s)")
         jwt_dated.body["nbf"] = now+100
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == false, "nbf in future \(s)")
         jwt_dated.body["nbf"] = now-100 // and leave it there for next tests
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == true, "nbf in past \(s)")
         jwt_dated.body["iat"] = now+100
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == false, "iat in future \(s)")
         jwt_dated.body["iat"] = now-100 // and leave it there for next tests
-        s = jwt_dated.dumps("")!
+        s = jwt_dated.dumps()!
         XCTAssert(jwt.loads(s, key: nil, verify: true) == true, "iat in past \(s)")
     }
 
@@ -104,9 +104,9 @@ class JWTTests: XCTestCase {
         var jwt = JWTNaCl(algorithms: ["Ed25519"])
         XCTAssert(jwt.loads(jwt_ed, key: kp!.publicKey, verify: true) == false, "NaCl JWT should not validate with wrong key")
         // but is still loaded (DO WE WANT THAT?)
-        let jwt_str = jwt.dumps(kp!.secretKey)! // valid Ed25519 signed token
+        let jwt_str = jwt.dumps(key: kp!.secretKey)! // valid Ed25519 signed token
         jwt.header = [:]
-        XCTAssert(jwt.header["alg"] as? String == "Ed25519", "after reset of header, alg should be unchanged")
+        XCTAssert(jwt.header["alg"] as? String == "none", "after reset of header, alg should be none")
         jwt.body = [:]
         XCTAssert(jwt.loads(jwt_str, key: nil, verify: true) == false, "verify a generated JWT to kid when signed with fresh key")
         XCTAssert(jwt.loads(jwt_str, key: kp!.publicKey, verify: true), "verify a generated JWT with its public key")

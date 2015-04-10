@@ -1,5 +1,5 @@
 //
-//  JWT.swift
+//  SwiftJWT.swift
 //
 //  Stan P. van de Burgt
 //  stan@vandeburgt.com
@@ -20,25 +20,21 @@ public class JWT {
             if header["alg"] as? String == nil {
                 self.header["alg"] = "none"     // if not present, insert alg
             }
-            if !self.whitelisted(header["alg"] as? String) {
-                // TODO: what to do when the alg is not whitelisted? We need Exceptions!
-                self.header["alg"] = oldValue["alg"] // TODO: or better: fail on loads?
-            }
         }
     }
     public var body: [String: AnyObject] = [:]  // JWT payload
     var algorithms: [String] = []               // algorithms that are valid on loads(), dumps() and setting 'alg' header
 
     public init(algorithms: [String]) {
-        self.algorithms = algorithms            // TODO: check if algoritms are implemented()
+        self.algorithms = implemented(algorithms) // only add algoritms that are implemented()
     }
 
     public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]) {
         self.header = header
         self.body = body
-        self.algorithms = algorithms            // TODO: check if algoritms are implemented()
+        self.algorithms = implemented(algorithms) // only add algoritms that are implemented()
         if header["alg"] as? String == nil {
-            self.header["alg"] = "none"         // if not present, insert 'alg' (copy of didSet{} ad init does not trigger it)
+            self.header["alg"] = "none"         // if not present, insert 'alg'
         }
         if header["typ"] as? String == nil {
             self.header["typ"] = "JWT"          // if not present, insert 'typ' element
@@ -66,12 +62,16 @@ public class JWT {
         // decode the header (a URL-safe, base 64 encoded JSON dict) from 1st part
         let hdr_data = parts[0].base64SafeUrlDecode()
         if let dictionary = NSJSONSerialization.JSONObjectWithData(hdr_data, options: NSJSONReadingOptions(0), error: error)  as? [String: AnyObject] {
-            self.header = dictionary // also sets self.alg and value for "alg" key by the didSet{} observer
+            self.header = dictionary
+            let alg = self.header["alg"] as? String
+            if !self.implemented(alg) {
+                return false // TODO: populate NSError
+            }
         }
         else {
             return false // TODO: populate NSError
         }
-        // check whether alg parameter is on algorithms whitelist
+        // check that "alg" header is on whitelist (and thus implemented) ; even if verify == false
         let algorithm = header["alg"] as? String
         if !self.whitelisted(algorithm) {
             return false // TODO: populate NSError
@@ -115,10 +115,9 @@ public class JWT {
         return loads(jwt, key: key_raw, verify: verify, error: error)
     }
 
-    public func dumps(key: NSData, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
+    public func dumps(key: NSData? = nil, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
         // create a JWT string from this object
         // TODO: some way to indicate that some fields should be generated, next to jti; e.g. nbf and iat
-        var data = ""
         var payload = self.body
         // if 'jti' (the nonce) not present in body, and it is requested (jti_len > 0), set one
         if payload["jti"] as? String == nil && jti_len > 0 {
@@ -128,15 +127,18 @@ public class JWT {
             SecRandomCopyBytes(kSecRandomDefault, jti_len, UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
             payload["jti"] = bytes.base64SafeUrlEncode()
         }
-        // TODO: set iat, nbf here if not set?
+        // TODO: set iat, nbf in payload here if not set & requested?
         if let h = NSJSONSerialization.dataWithJSONObject(self.header, options: nil, error: error) {
-            data = h.base64SafeUrlEncode()
+            var data = h.base64SafeUrlEncode()
             if let b = NSJSONSerialization.dataWithJSONObject(payload, options: nil, error: error) {
                 data = data + "." + b.base64SafeUrlEncode()
-                let data_raw = data.dataUsingEncoding(NSUTF8StringEncoding)!
-                let algorithm = header["alg"] as? String
-                if let sig = self.signature(data_raw, algorithm: algorithm!, key: key) {
-                    return data + "." + sig
+                // check that "alg" header is on whitelist (and thus implemented)
+                let alg = self.header["alg"] as? String
+                if self.whitelisted(alg) {
+                    let data_raw = data.dataUsingEncoding(NSUTF8StringEncoding)!
+                    if let sig = self.signature(data_raw, algorithm: alg!, key: key) {
+                        return data + "." + sig
+                    }
                 }
             }
         }
@@ -144,9 +146,12 @@ public class JWT {
     }
 
     // helper function for plain strings as key
-    public func dumps(key: String, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
-        let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
-        return dumps(key_raw, jti_len: jti_len, error: error)
+    public func dumps(key: String?, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
+        var key_raw: NSData? = nil
+        if let key_str = key {
+            key_raw = key_str.dataUsingEncoding(NSUTF8StringEncoding)!
+        }
+        return dumps(key: key_raw, jti_len: jti_len, error: error)
     }
 
     func whitelisted(algorithm: String?) -> Bool {
@@ -168,18 +173,32 @@ public class JWT {
         return false
     }
 
-    func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
+    func implemented(algorithms: [String]) -> [String] {
+        var result: [String] = []
+        for alg in algorithms {
+            if implemented(alg) {
+                result.append(alg)
+            }
+        }
+        return result
+    }
+
+    func signature(msg: NSData, algorithm: String, key: NSData?) -> String? {
         // internal function to compute the signature (third) part of a JWT
-        switch algorithm {
-        case "none":  return ""
-        case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key)
-        case "HS384": return msg.base64digest(HMACAlgorithm.SHA384, key: key)
-        case "HS512": return msg.base64digest(HMACAlgorithm.SHA512, key: key)
-        case "RS256": return msg.rsa_signature(HMACAlgorithm.SHA256, key: key)
-        case "RS384": return msg.rsa_signature(HMACAlgorithm.SHA384, key: key)
-        case "RS512": return msg.rsa_signature(HMACAlgorithm.SHA512, key: key)
-        // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
-        default:      return nil
+        if let key_raw = key {
+            switch algorithm {
+            case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key_raw)
+            case "HS384": return msg.base64digest(HMACAlgorithm.SHA384, key: key_raw)
+            case "HS512": return msg.base64digest(HMACAlgorithm.SHA512, key: key_raw)
+            case "RS256": return msg.rsa_signature(HMACAlgorithm.SHA256, key: key_raw)
+            case "RS384": return msg.rsa_signature(HMACAlgorithm.SHA384, key: key_raw)
+            case "RS512": return msg.rsa_signature(HMACAlgorithm.SHA512, key: key_raw)
+                // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
+            default:      return nil
+            }
+        }
+        else {
+            return algorithm == "none" ? "" : nil
         }
     }
 
@@ -215,13 +234,13 @@ public class JWT {
             return false // 'typ' shall be present
         }
         if let exp = self.body["exp"] as? UInt {
-            if now > exp { return false }
+            if now > exp { return false } // TODO: also false if "exp" is not of type UInt
         }
         if let nbf = self.body["nbf"] as? UInt {
-            if now < nbf { return false }
+            if now < nbf { return false } // TODO: also false if "nbf" is not of type UInt
         }
         if let iat = self.body["iat"] as? UInt {
-            if now < iat { return false }
+            if now < iat { return false } // TODO: also false if "iat" is not of type UInt
         }
         return true
     }
@@ -243,9 +262,9 @@ public class JWTNaCl: JWT {
         return super.implemented(algorithm) // not implemented here, so try parent
     }
 
-    override func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
+    override func signature(msg: NSData, algorithm: String, key: NSData?) -> String? {
         if algorithm == "Ed25519" {
-            return msg.nacl_signature(key)
+            return msg.nacl_signature(key!) // will crash on nil key
         }
         else {
             return super.signature(msg, algorithm: algorithm, key: key)

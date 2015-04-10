@@ -24,9 +24,9 @@ class JWTTests: XCTestCase {
     
     func test_HS256_JWT_from_dicts() {
         // This is an example of a functional test case.
-        let expected_jwt = "eyJhbGciOiJIUzI1NiJ9.eyJoZWxsbyI6IndvcmxkIn0.URnYdSXdAAEukebqZgMq6oFjK4E9cEZlfvO8tBe_WeA"
+        let expected_jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJoZWxsbyI6IndvcmxkIn0.lnneNaoem98xYFES3mi2CJJjnMONuWAu-FTWB3XJN14"
         let jwt = JWT(header: ["alg":"HS256"], body: ["hello":"world"])
-        let s = jwt.dumps("secret")
+        let s = jwt.dumps("secret", jti_len: 0) // without jti to enable replay
         XCTAssert(s != nil, "JWT.dumps() failed")
         XCTAssert(s! == expected_jwt, "JWT.dumps() unexpected jwt")
     }

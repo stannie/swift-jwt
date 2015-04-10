@@ -3,7 +3,8 @@
 //  
 //  Stan P. van de Burgt
 //  stan@vandeburgt.com
-//  (c) 2015
+//  (c) RoundZero 2015
+//  Project Authentiq
 
 import Foundation
 
@@ -11,14 +12,14 @@ public class JWT {
     // https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-4
     // base class; supports alg: none, HS256, HS384, HS512
 
-    public var header: [String: AnyObject] = ["alg": "none"] {
+    public var header: [String: AnyObject] = ["alg": "none", "typ": "JWT", ] {
         didSet {
             if header["alg"] as? String == nil {
                 self.header["alg"] = "none"     // if not present, insert alg
             }
         }
     }
-    public var body: [String: AnyObject] = [:]
+    public var body: [String: AnyObject] = [:]  // TODO: better use whitelist / allowed_algs
     var blacklist: [String] = []                // algorithms that are deemed invalid
 
     public init(blacklist: [String] = []) {
@@ -30,7 +31,10 @@ public class JWT {
         self.body = body
         self.blacklist = blacklist
         if header["alg"] as? String == nil {
-            self.header["alg"] = "none"         // if not present, insert alg (copy of didSet{} ad init does not trigger it)
+            self.header["alg"] = "none"         // if not present, insert 'alg' (copy of didSet{} ad init does not trigger it)
+        }
+        if header["typ"] as? String == nil {
+            self.header["typ"] = "JWT"          // if not present, insert 'typ' element
         }
     }
 
@@ -61,6 +65,7 @@ public class JWT {
             return false
         }
         // check whether alg parameter is on blacklist
+        // TODO: change to whitelist
         let algorithm = header["alg"] as? String
         for alg in self.blacklist {
             if alg == algorithm {
@@ -90,6 +95,7 @@ public class JWT {
                 return false
             }
         }
+        // TODO: do not load header & body if verification fails?
         return true
     }
 
@@ -105,11 +111,21 @@ public class JWT {
         return loads(jwt, key: key_raw, verify: verify, error: error)
     }
 
-    public func dumps(key: NSData, error: NSErrorPointer = nil) -> String? {
+    public func dumps(key: NSData, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
         var data = ""
+        var payload = self.body
+        // if 'jti' (the nonce) not present in body, and it is requested (jti_len > 0), set one
+        if payload["jti"] as? String == nil && jti_len > 0 {
+            // generate a random string (nonce) of length jti_len for body item 'jti'
+            // https://developer.apple.com/library/ios/documentation/Security/Reference/RandomizationReference/index.html
+            var bytes = NSMutableData(length: Int(jti_len))!
+            SecRandomCopyBytes(kSecRandomDefault, jti_len, UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
+            payload["jti"] = bytes.base64SafeUrlEncode()
+        }
+        // TODO: set iat, nbf here if not set?
         if let h = NSJSONSerialization.dataWithJSONObject(self.header, options: nil, error: error) {
             data = h.base64SafeUrlEncode()
-            if let b = NSJSONSerialization.dataWithJSONObject(self.body, options: nil, error: error) {
+            if let b = NSJSONSerialization.dataWithJSONObject(payload, options: nil, error: error) {
                 data = data + "." + b.base64SafeUrlEncode()
                 let data_raw = data.dataUsingEncoding(NSUTF8StringEncoding)!
                 let algorithm = header["alg"] as? String
@@ -122,20 +138,13 @@ public class JWT {
     }
 
     // helper function for plain strings as key
-    public func dumps(key: String, error: NSErrorPointer = nil) -> String? {
+    public func dumps(key: String, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
         let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
-        return dumps(key_raw, error: error)
+        return dumps(key_raw, jti_len: jti_len, error: error)
     }
 
-    public func setnonce(length: Int = 32) -> String {
-        var bytes = NSMutableData(length: length)!
-        SecRandomCopyBytes(kSecRandomDefault, UInt(length), UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
-        let jti = bytes.base64SafeUrlEncode()
-        self.body["jti"] = jti
-        return jti
-    }
-    
     func signature(msg: NSData, algorithm: String, key: NSData) -> String? {
+        // internal function to compute the signature (third) part of a JWT
         switch algorithm {
         case "none":  return ""
         case "HS256": return msg.base64digest(HMACAlgorithm.SHA256, key: key)
@@ -146,6 +155,7 @@ public class JWT {
     }
 
     func verify_signature(msg: NSData, signature: String, algorithm: String, key: NSData? = nil) -> Bool {
+        // internal function to verify the signature (third) part of a JWT
         if key == nil && algorithm != "none" {
             return false
         }
@@ -159,9 +169,16 @@ public class JWT {
     }
 
     func verify_content() -> Bool {
+        // internal function to verify the content (header and body) parts of a JWT
         let date = NSDate()
         let now = UInt(date.timeIntervalSince1970)
 
+        if let typ = self.header["typ"] as? String {
+            if typ != "JWT" { return false } // 'typ' shall be 'JWT'
+        }
+        else {
+            return false // 'typ' shall be present
+        }
         if let exp = self.body["exp"] as? UInt {
             if now > exp { return false }
         }
@@ -177,6 +194,7 @@ public class JWT {
 
 // MARK: - NaCl signatures
 // subclass with additional sign/verify for "Ed25519" signatures
+// TODO: move following class and nacl_* extentions to NSData to JWTNaCl.swift ?
 
 public class JWTNaCl: JWT {
 
@@ -215,7 +233,7 @@ public class JWTNaCl: JWT {
             }
         }
         else {
-            return false // kid is not optional
+            return false // kid is not optional when using NaCl
         }
         if let sub = self.body["sub"] as? String {
             let id = sub.base64SafeUrlDecode(nil)
@@ -268,11 +286,11 @@ extension NSData {
 }
 
 // MARK: - HMACAlgorithm
-// See http://stackoverflow.com/questions/25248598/importing-commoncrypto-in-a-swift-framework (answer from stephencelis)
+// See http://stackoverflow.com/questions/25248598/importing-commoncrypto-in-a-swift-framework (answer by stephencelis) on how to import
 
 import CommonCrypto
 
-// Inspired by: http://stackoverflow.com/questions/24099520/commonhmac-in-swift
+// See: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost) on HMAC signing.
 
 enum HMACAlgorithm {
     case MD5, SHA1, SHA224, SHA256, SHA384, SHA512
@@ -316,12 +334,16 @@ enum HMACAlgorithm {
     }
 }
 
+// See http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa on RSA signing
+
+
 import Sodium
 // swift wrapper of LibSodium, a NaCl implementation https://github.com/jedisct1/swift-sodium
 // git checkout 176033d7c1cbc4dfe4bed648aa230c9e14ab9426 # for Swift 1.1, as latest is 1.2
 
 extension NSData {
 
+    // Inspired by: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost)
     func base64digest(algorithm: HMACAlgorithm, key: NSData) -> String! {
         let data = self.bytes
         let dataLen = UInt(self.length)
@@ -351,6 +373,110 @@ extension NSData {
         }
         return false
     }
+
+    // TODO: finalize the next 2 functions to implement RSnnn algorithms, for nnn = 224 or 256 or 384 or 512
+    // based on http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
+
+    // TODO: add an algorithm parameter
+    func rsa_signature(key: NSData) -> NSData! {
+        // TODO: how to get to the SecKey part / version of the private key, if given as NSData
+        let key: SecKey? = nil
+        let msg = UnsafePointer<UInt8>(self.bytes)
+        let msglen = UInt(self.length)
+
+        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) // or 224 or 384 or 512
+        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // or 224 or 384 or 512
+
+        var sig = NSMutableData(length: Int(CC_SHA256_DIGEST_LENGTH))! // or 224 or 384 or 512
+        var sigbuf = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) ?
+        let siglen = UnsafeMutablePointer<UInt>.alloc(1) // correct? and initialize to CC_SHA256_DIGEST_LENGTH ?
+
+        // TODO: fix error in next line, call to SecKeyRawSign
+        //let status = SecKeyRawSign(key: key!, padding: kSecPaddingPKCS1SHA256, dataToSign: msg, dataToSignLen: msglen, sig: sigbuf, sigLen: siglen)
+
+        //OSStatus SecKeyRawSign(
+        //    SecKeyRef           privKey,
+        //    SecPadding          padding,
+        //    const uint8_t       *dataToSign,
+        //    size_t              dataToSignLen,
+        //    uint8_t             *sig,
+        //    size_t              *sigLen)
+
+        return sig
+    }
+
+    func rsa_verify(signature: String, key: NSData) -> Bool {
+        let key: SecKey? = nil
+        let msg = UnsafePointer<UInt8>(self.bytes)
+        let msglen = UInt(self.length)
+
+        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH))
+        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+
+        var sig = NSMutableData(length: Int(CC_SHA256_DIGEST_LENGTH))!
+        let sig_raw = signature.base64SafeUrlDecode()
+        var sigbuf = UnsafeMutablePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) ?
+        let siglen = UInt(sig_raw.length) // or pointer ?
+
+        // TODO: fix error in next line, call to SecKeyRawSign
+        // let status = SecKeyRawVerify(key: key!, padding: kSecPaddingPKCS1SHA256, signedData: msg, signedDataLen: msglen, sig: sigbuf, sigLen: siglen)
+        // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: UInt, sig: UnsafePointer<UInt8>, sigLen: UInt)
+
+        return false
+    }
 }
+
+// example code from http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
+
+//NSData* PKCSSignBytesSHA256withRSA(NSData* plainData, SecKeyRef privateKey)
+//{
+//    size_t signedHashBytesSize = SecKeyGetBlockSize(privateKey);
+//    uint8_t* signedHashBytes = malloc(signedHashBytesSize);
+//    memset(signedHashBytes, 0x0, signedHashBytesSize);
+//
+//    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
+//    uint8_t* hashBytes = malloc(hashBytesSize);
+//    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
+//        return nil;
+//    }
+//
+//    SecKeyRawSign(privateKey,
+//        kSecPaddingPKCS1SHA256,
+//        hashBytes,
+//        hashBytesSize,
+//        signedHashBytes,
+//        &signedHashBytesSize);
+//
+//    NSData* signedHash = [NSData dataWithBytes:signedHashBytes
+//        length:(NSUInteger)signedHashBytesSize];
+//
+//    if (hashBytes)
+//    free(hashBytes);
+//    if (signedHashBytes)
+//    free(signedHashBytes);
+//
+//    return signedHash;
+//}
+
+//BOOL PKCSVerifyBytesSHA256withRSA(NSData* plainData, NSData* signature, SecKeyRef publicKey)
+//{
+//    size_t signedHashBytesSize = SecKeyGetBlockSize(publicKey);
+//    const void* signedHashBytes = [signature bytes];
+//
+//    size_t hashBytesSize = CC_SHA256_DIGEST_LENGTH;
+//    uint8_t* hashBytes = malloc(hashBytesSize);
+//    if (!CC_SHA256([plainData bytes], (CC_LONG)[plainData length], hashBytes)) {
+//        return nil;
+//    }
+//
+//    OSStatus status = SecKeyRawVerify(publicKey,
+//        kSecPaddingPKCS1SHA256,
+//        hashBytes,
+//        hashBytesSize,
+//        signedHashBytes,
+//        signedHashBytesSize);
+//
+//    return status == errSecSuccess;
+//}
 
 // END

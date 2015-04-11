@@ -14,3 +14,17 @@ var jwt = JWT(algorithms: ["none","HS256"])
 var j = jwt.loads(jwt_str, key: "secret")
 let new_jwt_str = jwt.dumps("xxx")!
 ```
+
+```Swift
+import JWT
+
+let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiWE43VnBFWDF1Q3h4aHZ3VXVhY1lodVU5dDZ1eGdMYWhSaUxlU0VIRU5payJ9.eyJmb28iOiJiYXIifQ.a2dDcKXByKxiouOLnXUm7YUKHMGOU3yn_g91C90e8YmKjlF1_9ylAKukfMm6Y6WS3dZp2ysaglzzTnVxnRYyDQ"
+let sk = "YHWUUc0P6SY46WaDdnssE8NpFsQQxJrvmdOrpU9X0wU"
+let pk = "XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"
+
+var jwt = JWTNaCl(algorithms: ["Ed25519","none"])
+jwt.loads(jwt_ed)
+jwt.header["alg"] = "none"
+println(jwt.dumps()!)
+```
+

@@ -8,5 +8,12 @@ let jwt_str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InBob25lIiwicGhv
 
 var jwt = JWT(algorithms: ["none","HS256"])
 var j = jwt.loads(jwt_str, key: "secret")
-println(jwt.dumps("geheim")!)
+println(jwt.dumps("geheim"))
 
+let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiWE43VnBFWDF1Q3h4aHZ3VXVhY1lodVU5dDZ1eGdMYWhSaUxlU0VIRU5payJ9.eyJmb28iOiJiYXIifQ.a2dDcKXByKxiouOLnXUm7YUKHMGOU3yn_g91C90e8YmKjlF1_9ylAKukfMm6Y6WS3dZp2ysaglzzTnVxnRYyDQ"
+let sk = "YHWUUc0P6SY46WaDdnssE8NpFsQQxJrvmdOrpU9X0wU"
+let pk = "XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"
+jwt = JWTNaCl(algorithms: ["Ed25519","none"])
+jwt.loads(jwt_ed)
+jwt.header["alg"] = "none"
+println(jwt.dumps()!)

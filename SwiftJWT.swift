@@ -43,11 +43,16 @@ public class JWT {
 
     public func loads(jwt: String, key: NSData? = nil, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
         // load a JWT string into this object
+        var sig = ""
+        var hdr: [String: AnyObject]?
+        var payload: [String: AnyObject]?
+        var algorithm: String?
+
+        // clear object properties
         self.header = [:]
         self.body = [:]
-        var sig = ""
 
-        // split into parts, header, body, optional signature
+        // split JWT string into parts: header, body, optional signature
         let parts: [String] = jwt.componentsSeparatedByString(".")
         switch parts.count {
         case 2: break
@@ -61,45 +66,48 @@ public class JWT {
 
         // decode the header (a URL-safe, base 64 encoded JSON dict) from 1st part
         let hdr_data = parts[0].base64SafeUrlDecode()
-        if let dictionary = NSJSONSerialization.JSONObjectWithData(hdr_data, options: NSJSONReadingOptions(0), error: error)  as? [String: AnyObject] {
-            self.header = dictionary
-            let alg = self.header["alg"] as? String
-            if !self.implemented(alg) {
+        hdr = NSJSONSerialization.JSONObjectWithData(hdr_data, options: NSJSONReadingOptions(0), error: error)  as? [String: AnyObject]
+        if hdr != nil {
+            // check that "alg" header is on whitelist (and thus implemented) ; even if verify == false
+            algorithm = hdr!["alg"] as? String
+            if !self.whitelisted(algorithm) {
                 return false // TODO: populate NSError
             }
         }
         else {
             return false // TODO: populate NSError
         }
-        // check that "alg" header is on whitelist (and thus implemented) ; even if verify == false
-        let algorithm = header["alg"] as? String
-        if !self.whitelisted(algorithm) {
-            return false // TODO: populate NSError
-        }
         // decode the body (a URL-safe base 64 encoded JSON dict) from the 2nd part
         if parts.count > 1 {
             let body_data = parts[1].base64SafeUrlDecode()
-            if let dictionary = NSJSONSerialization.JSONObjectWithData(body_data, options: NSJSONReadingOptions(0), error: error)  as? [String: AnyObject] {
-                self.body = dictionary
+            payload = NSJSONSerialization.JSONObjectWithData(body_data, options: NSJSONReadingOptions(0), error: error)  as? [String: AnyObject]
+            if payload == nil  {
+                return false // TODO: populate NSError
             }
         }
         else {
             return false // TODO: populate NSError
         }
 
+        // all went well so far, so let's set the object properties
+        // TODO: set properties even later (but are needed by verification methods now)
+        self.header = hdr!
+        self.body = payload!
+
         if verify {
             // verify the signature, a URL-safe base64 encoded string
             let hdr_body: String = parts[0] + "." + parts[1] // header & body of a JWT
             let data = hdr_body.dataUsingEncoding(NSUTF8StringEncoding)!
             if self.verify_signature(data, signature: sig, algorithm: algorithm!, key: key) == false {
+                self.header = [:]; self.body = [:] // reset
                 return false // TODO: populate NSError
             }
             // verify content fields
             if self.verify_content() == false {
-                return false
+                self.header = [:]; self.body = [:] // reset
+                return false // TODO: populate NSError
             }
         }
-        // TODO: do not load header & body if verification fails?
         return true
     }
 
@@ -162,6 +170,7 @@ public class JWT {
 
     func implemented(algorithm: String?) -> Bool {
         let algorithms = ["none", "HS256", "HS384", "HS512"]
+        // TODO: add RS256, RS384, RS512 when rsa_* methods below are done
         for alg in algorithms {
             if alg == algorithm {
                 return true
@@ -445,15 +454,16 @@ extension NSData {
         let privkey: SecKey? = nil
         let msg = UnsafePointer<UInt8>(self.bytes)
         let msglen = UInt(self.length)
+        let digestLen = algorithm.digestLength()
 
-        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) // or 224 or 384 or 512
-        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // or 224 or 384 or 512
+        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
+        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // TODO: use 384 or 512 versions, depending on algorithm
 
-        var sig = NSMutableData(length: Int(CC_SHA256_DIGEST_LENGTH))! // or 224 or 384 or 512
-        var sigbuf = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) ?
-        let siglen = UnsafeMutablePointer<UInt>.alloc(1) // correct? and initialize to CC_SHA256_DIGEST_LENGTH ?
+        var sig = NSMutableData(length: Int(digestLen))!
+        var sigbuf = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
+        let siglen = UnsafeMutablePointer<UInt>.alloc(1) // correct? and initialize to digestLen ?
 
-        // TODO: fix error in next line, call to SecKeyRawSign
+        // TODO: fix error in next line, call to SecKeyRawSign, and use right padding constant
         //let status = SecKeyRawSign(key: privkey!, padding: kSecPaddingPKCS1SHA256, dataToSign: msg, dataToSignLen: msglen, sig: sigbuf, sigLen: siglen)
 
         //OSStatus SecKeyRawSign(
@@ -471,16 +481,17 @@ extension NSData {
         let pubkey: SecKey? = nil
         let msg = UnsafePointer<UInt8>(self.bytes)
         let msglen = UInt(self.length)
+        let digestLen = algorithm.digestLength()
 
-        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH))
-        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
+        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // TODO: use 384 or 512 versions, depending on algorithm
 
-        var sig = NSMutableData(length: Int(CC_SHA256_DIGEST_LENGTH))!
+        var sig = NSMutableData(length: Int(digestLen))!
         let sig_raw = signature.base64SafeUrlDecode()
-        var sigbuf = UnsafeMutablePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(CC_SHA256_DIGEST_LENGTH)) ?
+        var sigbuf = UnsafeMutablePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
         let siglen = UInt(sig_raw.length)
 
-        // TODO: fix error in next line, call to SecKeyRawSign
+        // TODO: fix error in next line, call to SecKeyRawVerify, and use right padding constant
         // let status = SecKeyRawVerify(key: pubkey!, padding: kSecPaddingPKCS1SHA256, signedData: msg, signedDataLen: msglen, sig: sigbuf, sigLen: siglen)
         // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: UInt, sig: UnsafePointer<UInt8>, sigLen: UInt)
 

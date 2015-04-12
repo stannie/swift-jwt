@@ -1,6 +1,6 @@
 // Playground - noun: a place where people can play
 
-import JWT
+import SwiftJWT
 
 // Example: load a HS256 signed JWT from a sting, and generate a new one with a new password
 

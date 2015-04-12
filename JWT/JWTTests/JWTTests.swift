@@ -97,18 +97,37 @@ class JWTTests: XCTestCase {
         // generate keys
         let sodium = Sodium()!
         let seed = NSMutableData(length: sodium.sign.SeedBytes)!
-//        SecRandomCopyBytes(kSecRandomDefault, UInt(sodium.sign.SeedBytes), UnsafeMutablePointer<UInt8>(seed.mutableBytes))
         SecRandomCopyBytes(kSecRandomDefault, sodium.sign.SeedBytes, UnsafeMutablePointer<UInt8>(seed.mutableBytes))
-        let kp = sodium.sign.keyPair(seed: seed)
-        // This is an example of a functional test case.
-        XCTAssert(kp != nil, "Key pair generation")
+        let kpp = sodium.sign.keyPair(seed: seed)
+        XCTAssert(kpp != nil, "Key pair generation")
+        let kp = kpp!
         var jwt = JWTNaCl(algorithms: ["Ed25519"])
-        XCTAssert(jwt.loads(jwt_ed, key: kp!.publicKey, verify: true) == false, "NaCl JWT should not validate with wrong key")
+        XCTAssert(jwt.loads(jwt_ed, key: kp.publicKey, verify: true) == false, "NaCl JWT should not validate with wrong key")
         // but is still loaded (DO WE WANT THAT?) NOW FAILS
         jwt = JWTNaCl(header: ["alg":"Ed25519","kid":"XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"], body: ["hello":"world"], algorithms: ["Ed25519"])
-        let jwt_str = jwt.dumps(key: kp!.secretKey)! // valid Ed25519 signed token
+        let jwt_str = jwt.dumps(key: kp.secretKey)! // valid Ed25519 signed token
         XCTAssert(jwt.loads(jwt_str, verify: true) == false, "verify a generated JWT with wrong kid when signed with fresh key")
-        XCTAssert(jwt.loads(jwt_str, key: kp!.publicKey, verify: true), "verify a generated JWT with its public key")
+        XCTAssert(jwt.loads(jwt_str, key: kp.publicKey, verify: true), "verify a generated JWT with its public key")
+    }
+
+    func test_NaCl_JWT_loadHS256_dumpEd() {
+        let jwt_hs256 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEifQ.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOi8vNS1kb3QtYXV0aGVudGlxaW8uYXBwc3BvdC5jb20iLCJzdWIiOiJhQkdvd1BIY0l0cG92ZVZ6cnJRc1NuazY1Y19xaEt2ZmpkLTR3eVBVZlVRIiwidHlwZSI6Im1vYmlsZSJ9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
+        // generate keys
+        let sodium = Sodium()!
+        let seed = NSMutableData(length: sodium.sign.SeedBytes)!
+        SecRandomCopyBytes(kSecRandomDefault, sodium.sign.SeedBytes, UnsafeMutablePointer<UInt8>(seed.mutableBytes))
+        let kpp = sodium.sign.keyPair(seed: seed)
+        XCTAssert(kpp != nil, "Key pair generation")
+        let kp = kpp!
+
+        var jwtn = JWTNaCl(algorithms: ["Ed25519","HS256"])
+        XCTAssert(jwtn.loads(jwt_hs256, key: "secret", verify: true), "could not load a HS256 JWT")
+        XCTAssert(jwtn.dumps("secret") != nil, "could not stringify a HS256 JWT")
+        jwtn.header["alg"] = "Ed25519" // set alg to NaCl type tokens
+        jwtn.dumps("secret") // THIS -> nil ; WHY?
+        let myjwt = jwtn.dumps(key: kp.secretKey) // valid Ed25519 signed token
+        XCTAssert(myjwt != nil, "could not stringify an Ed25519 JWT")
+        XCTAssert(jwtn.loads(myjwt!, key: kp.publicKey, verify: true) == true, "loading of generated Ed25519 JWT failed")
     }
 
     func testPerformanceVerify() {

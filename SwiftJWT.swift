@@ -11,7 +11,7 @@ import Foundation
 public class JWT {
     // https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-4
     // base class; supports alg: none, HS256, HS384, HS512
-    // TODO: add support for RS256, RS384, RS512
+    // TODO: add support for RS256, RS384, RS512 (almost there!)
     // TODO: add support for PS256, PS384, PS512
 
     public var header: [String: AnyObject] = ["alg": "none", "typ": "JWT", ] {
@@ -171,7 +171,7 @@ public class JWT {
 
     func implemented(algorithm: String?) -> Bool {
         let algorithms = ["none", "HS256", "HS384", "HS512"]
-        // TODO: add RS256, RS384, RS512 when rsa_* methods below are done
+        // TODO: add RS256, RS384, RS512, PS256, PS384, PS512 when rsa_* methods below are done
         for alg in algorithms {
             if alg == algorithm {
                 return true
@@ -200,7 +200,9 @@ public class JWT {
             case "RS256": return msg.rsa_signature(HMACAlgorithm.SHA256, key: key_raw)
             case "RS384": return msg.rsa_signature(HMACAlgorithm.SHA384, key: key_raw)
             case "RS512": return msg.rsa_signature(HMACAlgorithm.SHA512, key: key_raw)
-                // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
+            case "PS256": return msg.rsa_signature(HMACAlgorithm.SHA256, key: key_raw) // TODO: convert PS to RS key
+            case "PS384": return msg.rsa_signature(HMACAlgorithm.SHA384, key: key_raw)
+            case "PS512": return msg.rsa_signature(HMACAlgorithm.SHA512, key: key_raw)
             default:      return nil
             }
         }
@@ -222,7 +224,9 @@ public class JWT {
         case "RS256": return msg.rsa_verify(HMACAlgorithm.SHA256, signature: signature, key: key!)
         case "RS384": return msg.rsa_verify(HMACAlgorithm.SHA384, signature: signature, key: key!)
         case "RS512": return msg.rsa_verify(HMACAlgorithm.SHA512, signature: signature, key: key!)
-        // TODO: support for RSASSA-PSS algorithms: "PS256", "PS384", and "PS512"
+        case "PS256": return msg.rsa_verify(HMACAlgorithm.SHA256, signature: signature, key: key!) // TODO: convert PS to RS key
+        case "PS384": return msg.rsa_verify(HMACAlgorithm.SHA384, signature: signature, key: key!)
+        case "PS512": return msg.rsa_verify(HMACAlgorithm.SHA512, signature: signature, key: key!)
         default:      return false
         }
     }
@@ -427,6 +431,7 @@ extension NSData {
     }
 
     func nacl_signature(key: NSData) -> String! {
+        // key is privkey
         let sodium = Sodium()
         if let sig = sodium?.sign.signature(self, secretKey: key) {
             return sig.base64SafeUrlEncode()
@@ -434,6 +439,7 @@ extension NSData {
         return nil
     }
     func nacl_verify(signature: String, key: NSData) -> Bool {
+        // key is pubkey
         if let sodium = Sodium() {
             let sig_raw = signature.base64SafeUrlDecode()
             return sodium.sign.verify(self, publicKey: key, signature: sig_raw)
@@ -444,6 +450,7 @@ extension NSData {
     // based on http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
 
     func rsa_signature(algorithm: HMACAlgorithm, key: NSData) -> String? {
+        // key is privkey, in raw format
         let privkey: SecKey? = nil // TODO: get the SecKey format of the (private) key
         let msgbytes = UnsafePointer<UInt8>(self.bytes)
         let msglen = CC_LONG(self.length)
@@ -453,7 +460,7 @@ extension NSData {
         var padding: SecPadding
 
         switch algorithm {
-        case .SHA256: // TODO: change to HS256, ...
+        case .SHA256: // TODO: change to HS256, ... ?
             CC_SHA256(msgbytes, msglen, digestbytes) // TODO: test on nil return?
             padding = SecPadding(kSecPaddingPKCS1SHA256)
         case .SHA384:
@@ -468,17 +475,20 @@ extension NSData {
 
         var sig = NSMutableData(length: digestlen)!
         var sigbytes = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
-//        let siglen = UnsafeMutablePointer<Int>.alloc(1) // correct? and initialize to digestLen ? And dealloc at end?
         var siglen: Int = digestlen
 
         // OSStatus SecKeyRawSign(key: SecKey!, padding: SecPadding, dataToSign: UnsafePointer<UInt8>, dataToSignLen: Int, sig: UnsafeMutablePointer<UInt8>, sigLen: UnsafeMutablePointer<Int>)
         let status = SecKeyRawSign(privkey!, padding, digestbytes, digestlen, sigbytes, &siglen)
-        // TODO: use siglen to set the actual lenght of sig?
-
-        return status == errSecSuccess ? sig.base64SafeUrlEncode() : nil
+        if status == errSecSuccess {
+            // use siglen in/out parameter to set the actual lenght of sig
+            sig.length = siglen
+            return sig.base64SafeUrlEncode()
+        }
+        return nil
     }
 
     func rsa_verify(algorithm: HMACAlgorithm, signature: String, key: NSData) -> Bool {
+        // key is pubkey, in raw format
         let pubkey: SecKey? = nil /// TODO: get the SecKey format of the (public) key
         let msgbytes = UnsafePointer<UInt8>(self.bytes)
         let msglen = CC_LONG(self.length)

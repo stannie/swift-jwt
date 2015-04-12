@@ -132,8 +132,7 @@ public class JWT {
             // generate a random string (nonce) of length jti_len for body item 'jti'
             // https://developer.apple.com/library/ios/documentation/Security/Reference/RandomizationReference/index.html
             var bytes = NSMutableData(length: Int(jti_len))!
-//            SecRandomCopyBytes(kSecRandomDefault, jti_len, UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
-//            SecRandomCopyBytes(<#rnd: SecRandomRef#>, <#count: Int#>, bytes: UnsafeMutablePointer<UInt8>)
+            // SecRandomCopyBytes(rnd: SecRandomRef, count: Int, bytes: UnsafeMutablePointer<UInt8>)
             SecRandomCopyBytes(kSecRandomDefault, Int(jti_len), UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
             payload["jti"] = bytes.base64SafeUrlEncode()
         }
@@ -410,22 +409,16 @@ enum HMACAlgorithm {
 // See http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa on RSA signing
 
 
-import Sodium
-// swift wrapper of LibSodium, a NaCl implementation https://github.com/jedisct1/swift-sodium
+import Sodium   // swift wrapper of LibSodium, a NaCl implementation https://github.com/jedisct1/swift-sodium
 
 extension NSData {
 
-    // Inspired by: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost)
     func base64digest(algorithm: HMACAlgorithm, key: NSData) -> String! {
-//        let data = self.bytes
-//        let dataLen = UInt(self.length)
         let digestLen = algorithm.digestLength()
         let result = UnsafeMutablePointer<CUnsignedChar>.alloc(digestLen)
-//        let keyData = key.bytes
-//        let keyLen = UInt(key.length)
         
-//        CCHmac(algorithm.toCCEnum(), keyData, keyLen, data, dataLen, result)
-//        CCHmac(algorithm: algorithm.toCCEnum(), key: keyData, keyLength: keyLen, data: data, dataLength: dataLen, macOut: result)
+        // Inspired by: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost)
+        // CCHmac(algorithm: algorithm.toCCEnum(), key: keyData, keyLength: keyLen, data: data, dataLength: dataLen, macOut: result)
         CCHmac(algorithm.toCCEnum(), key.bytes, key.length, self.bytes, self.length, result)
         let hdata = NSData(bytes: result, length: digestLen)
         result.destroy()
@@ -448,59 +441,72 @@ extension NSData {
         return false
     }
 
-    // TODO: finalize the next 2 functions to implement RSnnn algorithms, for nnn = 224 or 256 or 384 or 512
     // based on http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
 
-    // TODO: use an algorithm parameter
     func rsa_signature(algorithm: HMACAlgorithm, key: NSData) -> String? {
         let privkey: SecKey? = nil // TODO: get the SecKey format of the (private) key
-        let msg = UnsafePointer<UInt8>(self.bytes)
-        let msglen = self.length
-        let digestLen = algorithm.digestLength()
+        let msgbytes = UnsafePointer<UInt8>(self.bytes)
+        let msglen = CC_LONG(self.length)
+        let digestlen = algorithm.digestLength()
+        var digest = NSMutableData(length: digestlen)!
+        let digestbytes = UnsafeMutablePointer<UInt8>(digest.mutableBytes)
+        var padding: SecPadding
 
-        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
-        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // TODO: use 384 or 512 versions, depending on algorithm
-        // UnsafeMutablePointer<UInt8> CC_SHA256(data: UnsafePointer<Void>, len: CC_LONG, md: UnsafeMutablePointer<UInt8>)
+        switch algorithm {
+        case .SHA256: // TODO: change to HS256, ...
+            CC_SHA256(msgbytes, msglen, digestbytes) // TODO: test on nil return?
+            padding = SecPadding(kSecPaddingPKCS1SHA256)
+        case .SHA384:
+            CC_SHA256(msgbytes, msglen, digestbytes)
+            padding = SecPadding(kSecPaddingPKCS1SHA384)
+        case .SHA512:
+            CC_SHA256(msgbytes, msglen, digestbytes)
+            padding = SecPadding(kSecPaddingPKCS1SHA512)
+        default:
+            return nil
+        }
 
-        var sig = NSMutableData(length: Int(digestLen))!
-        var sigbuf = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
-        let siglen = UnsafeMutablePointer<Int>.alloc(1) // correct? and initialize to digestLen ?
+        var sig = NSMutableData(length: digestlen)!
+        var sigbytes = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
+//        let siglen = UnsafeMutablePointer<Int>.alloc(1) // correct? and initialize to digestLen ? And dealloc at end?
+        var siglen: Int = digestlen
 
         // OSStatus SecKeyRawSign(key: SecKey!, padding: SecPadding, dataToSign: UnsafePointer<UInt8>, dataToSignLen: Int, sig: UnsafeMutablePointer<UInt8>, sigLen: UnsafeMutablePointer<Int>)
-        let status = SecKeyRawSign(privkey!, SecPadding(kSecPaddingPKCS1SHA256), msg, msglen, sigbuf, siglen)
- 
+        let status = SecKeyRawSign(privkey!, padding, digestbytes, digestlen, sigbytes, &siglen)
+        // TODO: use siglen to set the actual lenght of sig?
+
         return status == errSecSuccess ? sig.base64SafeUrlEncode() : nil
     }
 
     func rsa_verify(algorithm: HMACAlgorithm, signature: String, key: NSData) -> Bool {
         let pubkey: SecKey? = nil /// TODO: get the SecKey format of the (public) key
-        let msg = UnsafePointer<UInt8>(self.bytes)
-        let msglen = self.length
-        let digestLen = algorithm.digestLength()
-        let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
+        let msgbytes = UnsafePointer<UInt8>(self.bytes)
+        let msglen = CC_LONG(self.length)
+        let digestlen = algorithm.digestLength()
+        var digest = NSMutableData(length: digestlen)!
+        let digestbytes = UnsafeMutablePointer<UInt8>(digest.mutableBytes)
         var padding: SecPadding
 
         switch algorithm {
-        case .SHA256:
-            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+        case .SHA256: // TODO: change to HS256, ...
+            CC_SHA256(msgbytes, msglen, digestbytes) // TODO: test on nil return?
             padding = SecPadding(kSecPaddingPKCS1SHA256)
         case .SHA384:
-            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+            CC_SHA256(msgbytes, msglen, digestbytes)
             padding = SecPadding(kSecPaddingPKCS1SHA384)
         case .SHA512:
-            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+            CC_SHA256(msgbytes, msglen, digestbytes)
             padding = SecPadding(kSecPaddingPKCS1SHA512)
         default:
             return false
         }
 
-        var sig = NSMutableData(length: digestLen)!
-        let sig_raw = signature.base64SafeUrlDecode()
-        var sigbuf = UnsafePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
+        let sig_raw = signature.dataUsingEncoding(NSUTF8StringEncoding)!
+        let sigbytes = UnsafePointer<UInt8>(sig_raw.bytes)
         let siglen = sig_raw.length
 
         // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: Int, sig: UnsafePointer<UInt8>, sigLen: Int)
-        let status = SecKeyRawVerify(pubkey!, padding, msg, msglen, sigbuf, siglen)
+        let status = SecKeyRawVerify(pubkey!, padding, digestbytes, digestlen, sigbytes, siglen)
 
         return status == errSecSuccess
     }

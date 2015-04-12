@@ -132,7 +132,9 @@ public class JWT {
             // generate a random string (nonce) of length jti_len for body item 'jti'
             // https://developer.apple.com/library/ios/documentation/Security/Reference/RandomizationReference/index.html
             var bytes = NSMutableData(length: Int(jti_len))!
-            SecRandomCopyBytes(kSecRandomDefault, jti_len, UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
+//            SecRandomCopyBytes(kSecRandomDefault, jti_len, UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
+//            SecRandomCopyBytes(<#rnd: SecRandomRef#>, <#count: Int#>, bytes: UnsafeMutablePointer<UInt8>)
+            SecRandomCopyBytes(kSecRandomDefault, Int(jti_len), UnsafeMutablePointer<UInt8>(bytes.mutableBytes))
             payload["jti"] = bytes.base64SafeUrlEncode()
         }
         // TODO: set iat, nbf in payload here if not set & requested?
@@ -328,7 +330,7 @@ extension String {
         s = s.stringByReplacingOccurrencesOfString("-", withString: "+") // 62nd char of encoding
         s = s.stringByReplacingOccurrencesOfString("_", withString: "/") // 63rd char of encoding
         
-        switch (countElements(s) % 4) {     // Pad with trailing '='s
+        switch (count(s) % 4) {     // Pad with trailing '='s
         case 0: break; // No pad chars in this case
         case 2: s += "=="; break; // Two pad chars
         case 3: s += "="; break; // One pad char
@@ -410,20 +412,21 @@ enum HMACAlgorithm {
 
 import Sodium
 // swift wrapper of LibSodium, a NaCl implementation https://github.com/jedisct1/swift-sodium
-// git checkout 176033d7c1cbc4dfe4bed648aa230c9e14ab9426 # for Swift 1.1, as latest is 1.2
 
 extension NSData {
 
     // Inspired by: http://stackoverflow.com/questions/24099520/commonhmac-in-swift (answer by hdost)
     func base64digest(algorithm: HMACAlgorithm, key: NSData) -> String! {
-        let data = self.bytes
-        let dataLen = UInt(self.length)
+//        let data = self.bytes
+//        let dataLen = UInt(self.length)
         let digestLen = algorithm.digestLength()
         let result = UnsafeMutablePointer<CUnsignedChar>.alloc(digestLen)
-        let keyData = key.bytes
-        let keyLen = UInt(key.length)
+//        let keyData = key.bytes
+//        let keyLen = UInt(key.length)
         
-        CCHmac(algorithm.toCCEnum(), keyData, keyLen, data, dataLen, result)
+//        CCHmac(algorithm.toCCEnum(), keyData, keyLen, data, dataLen, result)
+//        CCHmac(algorithm: algorithm.toCCEnum(), key: keyData, keyLength: keyLen, data: data, dataLength: dataLen, macOut: result)
+        CCHmac(algorithm.toCCEnum(), key.bytes, key.length, self.bytes, self.length, result)
         let hdata = NSData(bytes: result, length: digestLen)
         result.destroy()
         

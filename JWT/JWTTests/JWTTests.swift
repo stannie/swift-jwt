@@ -97,7 +97,8 @@ class JWTTests: XCTestCase {
         // generate keys
         let sodium = Sodium()!
         let seed = NSMutableData(length: sodium.sign.SeedBytes)!
-        SecRandomCopyBytes(kSecRandomDefault, UInt(sodium.sign.SeedBytes), UnsafeMutablePointer<UInt8>(seed.mutableBytes))
+//        SecRandomCopyBytes(kSecRandomDefault, UInt(sodium.sign.SeedBytes), UnsafeMutablePointer<UInt8>(seed.mutableBytes))
+        SecRandomCopyBytes(kSecRandomDefault, sodium.sign.SeedBytes, UnsafeMutablePointer<UInt8>(seed.mutableBytes))
         let kp = sodium.sign.keyPair(seed: seed)
         // This is an example of a functional test case.
         XCTAssert(kp != nil, "Key pair generation")

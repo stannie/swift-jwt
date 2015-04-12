@@ -452,53 +452,57 @@ extension NSData {
     // based on http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa
 
     // TODO: use an algorithm parameter
-    func rsa_signature(algorithm: HMACAlgorithm, key: NSData) -> String! {
-        // TODO: how to get to the SecKey part / version of the private key, if given as NSData
-        let privkey: SecKey? = nil
+    func rsa_signature(algorithm: HMACAlgorithm, key: NSData) -> String? {
+        let privkey: SecKey? = nil // TODO: get the SecKey format of the (private) key
         let msg = UnsafePointer<UInt8>(self.bytes)
-        let msglen = UInt(self.length)
+        let msglen = self.length
         let digestLen = algorithm.digestLength()
 
         let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
         let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // TODO: use 384 or 512 versions, depending on algorithm
+        // UnsafeMutablePointer<UInt8> CC_SHA256(data: UnsafePointer<Void>, len: CC_LONG, md: UnsafeMutablePointer<UInt8>)
 
         var sig = NSMutableData(length: Int(digestLen))!
         var sigbuf = UnsafeMutablePointer<UInt8>(sig.mutableBytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
-        let siglen = UnsafeMutablePointer<UInt>.alloc(1) // correct? and initialize to digestLen ?
+        let siglen = UnsafeMutablePointer<Int>.alloc(1) // correct? and initialize to digestLen ?
 
-        // TODO: fix error in next line, call to SecKeyRawSign, and use right padding constant
-        //let status = SecKeyRawSign(key: privkey!, padding: kSecPaddingPKCS1SHA256, dataToSign: msg, dataToSignLen: msglen, sig: sigbuf, sigLen: siglen)
-
-        //OSStatus SecKeyRawSign(
-        //    SecKeyRef           privKey,
-        //    SecPadding          padding,
-        //    const uint8_t       *dataToSign,
-        //    size_t              dataToSignLen,
-        //    uint8_t             *sig,
-        //    size_t              *sigLen)
-
-        return sig.base64SafeUrlEncode()
+        // OSStatus SecKeyRawSign(key: SecKey!, padding: SecPadding, dataToSign: UnsafePointer<UInt8>, dataToSignLen: Int, sig: UnsafeMutablePointer<UInt8>, sigLen: UnsafeMutablePointer<Int>)
+        let status = SecKeyRawSign(privkey!, SecPadding(kSecPaddingPKCS1SHA256), msg, msglen, sigbuf, siglen)
+ 
+        return status == errSecSuccess ? sig.base64SafeUrlEncode() : nil
     }
 
     func rsa_verify(algorithm: HMACAlgorithm, signature: String, key: NSData) -> Bool {
-        let pubkey: SecKey? = nil
+        let pubkey: SecKey? = nil /// TODO: get the SecKey format of the (public) key
         let msg = UnsafePointer<UInt8>(self.bytes)
-        let msglen = UInt(self.length)
+        let msglen = self.length
         let digestLen = algorithm.digestLength()
-
         let sha_buf = UnsafeMutablePointer<UInt8>.alloc(Int(digestLen))
-        let sha_result = CC_SHA256(msg, CC_LONG(msglen), sha_buf) // TODO: use 384 or 512 versions, depending on algorithm
+        var padding: SecPadding
 
-        var sig = NSMutableData(length: Int(digestLen))!
+        switch algorithm {
+        case .SHA256:
+            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+            padding = SecPadding(kSecPaddingPKCS1SHA256)
+        case .SHA384:
+            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+            padding = SecPadding(kSecPaddingPKCS1SHA384)
+        case .SHA512:
+            CC_SHA256(msg, CC_LONG(msglen), sha_buf)
+            padding = SecPadding(kSecPaddingPKCS1SHA512)
+        default:
+            return false
+        }
+
+        var sig = NSMutableData(length: digestLen)!
         let sig_raw = signature.base64SafeUrlDecode()
-        var sigbuf = UnsafeMutablePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
-        let siglen = UInt(sig_raw.length)
+        var sigbuf = UnsafePointer<UInt8>(sig_raw.bytes) // or UnsafeMutablePointer<UInt8>.alloc(Int(digestLen)) ?
+        let siglen = sig_raw.length
 
-        // TODO: fix error in next line, call to SecKeyRawVerify, and use right padding constant
-        // let status = SecKeyRawVerify(key: pubkey!, padding: kSecPaddingPKCS1SHA256, signedData: msg, signedDataLen: msglen, sig: sigbuf, sigLen: siglen)
-        // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: UInt, sig: UnsafePointer<UInt8>, sigLen: UInt)
+        // OSStatus SecKeyRawVerify(key: SecKey!, padding: SecPadding, signedData: UnsafePointer<UInt8>, signedDataLen: Int, sig: UnsafePointer<UInt8>, sigLen: Int)
+        let status = SecKeyRawVerify(pubkey!, padding, msg, msglen, sigbuf, siglen)
 
-        return false // status == errSecSuccess
+        return status == errSecSuccess
     }
 }
 

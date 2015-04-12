@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import JWT
+import SwiftJWT
 import Sodium
 
 class JWTTests: XCTestCase {

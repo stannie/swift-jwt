@@ -17,3 +17,11 @@ jwt = JWTNaCl(algorithms: ["Ed25519","none"])
 jwt.loads(jwt_ed)
 jwt.header["alg"] = "none"
 println(jwt.dumps()!)
+
+jwt = JWT(header: ["alg":"HS256"],
+    body: [
+        "sub": "1234567890",
+        "name": "John Doe",
+        "admin": true
+    ], algorithms: nil)
+println(jwt.dumps("secret")!)

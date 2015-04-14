@@ -28,3 +28,14 @@ jwt.header["alg"] = "none"
 println(jwt.dumps()!)
 ```
 
+```Swift
+import JWT
+
+jwt = JWT(header: ["alg":"HS256"],
+    body: [
+        "sub": "1234567890",
+        "name": "John Doe",
+        "admin": true
+    ], algorithms: nil)
+println(jwt.dumps("secret")!)
+```

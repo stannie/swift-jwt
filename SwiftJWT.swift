@@ -29,12 +29,21 @@ public class JWT {
         self.algorithms = implemented(algorithms) // only add algoritms that are implemented()
     }
 
-    public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]) {
+//    public init(header: [String: AnyObject], body: [String: AnyObject]) {
+//        self.init(header: header, body: body, algorithms: nil) {
+//    }
+
+    public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]?) {
         self.header = header
         self.body = body
-        self.algorithms = implemented(algorithms) // only add algoritms that are implemented()
         if header["alg"] as? String == nil {
             self.header["alg"] = "none"         // if not present, insert 'alg'
+        }
+        if let alg = algorithms {
+            self.algorithms = implemented(alg) // only add algoritms that are implemented()
+        }
+        else {
+            self.algorithms = [self.header["alg"] as! String]
         }
         if header["typ"] as? String == nil {
             self.header["typ"] = "JWT"          // if not present, insert 'typ' element
@@ -111,13 +120,13 @@ public class JWT {
         return true
     }
 
-    // helper function for plain strings as key
+    // convenience method for plain strings as key
     public func loads(jwt: String, key: String, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
         let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
         return loads(jwt, key: key_raw, verify: verify, error: error)
     }
     
-    // helper function for base64 strings as key
+    // convenience method for base64 strings as key
     public func loads(jwt: String, b64key: String, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
         let key_raw = b64key.base64SafeUrlDecode()
         return loads(jwt, key: key_raw, verify: verify, error: error)
@@ -154,7 +163,7 @@ public class JWT {
         return nil // TODO: populate NSError
     }
 
-    // helper function for plain strings as key
+    // convenience method for plain strings as key
     public func dumps(key: String, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
         let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
         return dumps(key: key_raw, jti_len: jti_len, error: error)
@@ -333,10 +342,11 @@ extension String {
         s = s.stringByReplacingOccurrencesOfString("-", withString: "+") // 62nd char of encoding
         s = s.stringByReplacingOccurrencesOfString("_", withString: "/") // 63rd char of encoding
         
-        switch (count(s) % 4) {     // Pad with trailing '='s
-        case 0: break; // No pad chars in this case
-        case 2: s += "=="; break; // Two pad chars
-        case 3: s += "="; break; // One pad char
+        // Pad with trailing '='s
+        switch (count(s) % 4) {
+        case 0: break       // No pad chars in this case
+        case 2: s += "=="   // Two pad chars
+        case 3: s += "="    // One pad char
         default: return nil
         }
         

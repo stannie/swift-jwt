@@ -119,7 +119,7 @@ public class JWT {
             }
         }
         for fld in mandatory {
-            if self.body[fld] as? String == nil {
+            if self.body[fld] == nil {
                 // not present, but was mandatory
                 self.header = [:]; self.body = [:] // reset
                 return false // TODO: populate NSError

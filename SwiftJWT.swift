@@ -40,6 +40,7 @@ public class JWT {
             self.header["alg"] = "none"         // if not present, insert 'alg'
         }
         if let alg = algorithms {
+            // TODO: decide if this was smart, as it could introduce a vulnerability for the caller
             self.algorithms = implemented(alg) // only add algoritms that are implemented()
         }
         else {
@@ -50,7 +51,7 @@ public class JWT {
         }
     }
 
-    public func loads(jwt: String, key: NSData? = nil, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
+    public func loads(jwt: String, key: NSData? = nil, verify: Bool = true, mandatory: [String] = [], error: NSErrorPointer = nil) -> Bool {
         // load a JWT string into this object
         var sig = ""
         var hdr: [String: AnyObject]?
@@ -117,19 +118,26 @@ public class JWT {
                 return false // TODO: populate NSError
             }
         }
+        for fld in mandatory {
+            if self.body[fld] as? String == nil {
+                // not present, but was mandatory
+                self.header = [:]; self.body = [:] // reset
+                return false // TODO: populate NSError
+            }
+        }
         return true
     }
 
     // convenience method for plain strings as key
-    public func loads(jwt: String, key: String, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
+    public func loads(jwt: String, key: String, verify: Bool = true, mandatory: [String] = [], error: NSErrorPointer = nil) -> Bool {
         let key_raw = key.dataUsingEncoding(NSUTF8StringEncoding)!
-        return loads(jwt, key: key_raw, verify: verify, error: error)
+        return loads(jwt, key: key_raw, verify: verify, mandatory: mandatory, error: error)
     }
     
     // convenience method for base64 strings as key
-    public func loads(jwt: String, b64key: String, verify: Bool = true, error: NSErrorPointer = nil) -> Bool {
+    public func loads(jwt: String, b64key: String, verify: Bool = true, mandatory: [String] = [], error: NSErrorPointer = nil) -> Bool {
         let key_raw = b64key.base64SafeUrlDecode()
-        return loads(jwt, key: key_raw, verify: verify, error: error)
+        return loads(jwt, key: key_raw, verify: verify, mandatory: mandatory, error: error)
     }
 
     public func dumps(key: NSData? = nil, jti_len: UInt = 16, error: NSErrorPointer = nil) -> String? {
@@ -272,6 +280,10 @@ public class JWT {
 
 public class JWTNaCl: JWT {
 
+    public func _kid(key: NSData) -> String {
+        return key.base64SafeUrlEncode()
+    }
+
     override func implemented(algorithm: String?) -> Bool {
         let algorithms = ["Ed25519"]
         for alg in algorithms {
@@ -332,11 +344,11 @@ public class JWTNaCl: JWT {
 // MARK: - base64 extensions
 
 extension String {
-    func base64SafeUrlDecode() -> NSData { // ! ?
+    func base64SafeUrlDecode() -> NSData { // TODO : add ! or ?
         return self.base64SafeUrlDecode(nil)
     }
     
-    func base64SafeUrlDecode(options: NSDataBase64DecodingOptions) -> NSData! {
+    func base64SafeUrlDecode(options: NSDataBase64DecodingOptions) -> NSData! { // TODO: better use ? instead of ! ??
         var s: String = self;
         
         s = s.stringByReplacingOccurrencesOfString("-", withString: "+") // 62nd char of encoding

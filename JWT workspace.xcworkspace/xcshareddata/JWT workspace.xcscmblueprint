@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "D13A0161F3961F3380472D7F6128C9B2159DADA6",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "D13A0161F3961F3380472D7F6128C9B2159DADA6" : 0,
+    "CD87797B9D09AEEE7FEB1D43B38DA32D51BC7F68" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "FC5C1AE1-1DF3-43CF-89D3-D0C72142FD62",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "D13A0161F3961F3380472D7F6128C9B2159DADA6" : "swift-jwt\/",
+    "CD87797B9D09AEEE7FEB1D43B38DA32D51BC7F68" : "swift-sodium\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "JWT workspace",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "JWT workspace.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:ziogaschr\/swift-sodium.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "CD87797B9D09AEEE7FEB1D43B38DA32D51BC7F68"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:stannie\/swift-jwt.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D13A0161F3961F3380472D7F6128C9B2159DADA6"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name        = "SwiftJWT"
-  s.version     = "0.4"
+  s.version     = "0.5"
   s.summary     = "a JSON Web Token implementation in Swift on iOS & OSX"
   s.homepage    = "git://github.com/stannie/swift-jwt"
   s.license     = { :type => "MIT", :file => 'LICENSE' }
@@ -9,9 +9,11 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = "8.0"
   s.osx.deployment_target = "10.9"
-  s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :tag => s.version}
+  # s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :tag => s.version}
+  s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :branch => "master"}
+
   # https://github.com/stannie/swift-jwt.git git@github.com:stannie/swift-jwt.git
-  s.source_files = "*.swift"
+  s.source_files = "JWT/JWT/*.{swift,h}"
   s.requires_arc = true
 
   # s.frameworks = "CommonCrypto"

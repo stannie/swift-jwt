@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF61BEB4EB4000D4544 /* String+JWT.swift */; };
+		DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */; };
+		DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */; };
 		F672EDE71ACB44520020B9BA /* SwiftJWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F672EDE61ACB44520020B9BA /* SwiftJWT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F672EDED1ACB44520020B9BA /* SwiftJWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F672EDE11ACB44520020B9BA /* SwiftJWT.framework */; };
 		F672EDF41ACB44520020B9BA /* JWTTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672EDF31ACB44520020B9BA /* JWTTests.swift */; };
@@ -41,13 +44,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DE183DF61BEB4EB4000D4544 /* String+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+JWT.swift"; path = "Extensions/String+JWT.swift"; sourceTree = "<group>"; };
+		DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "NSData+JWT.swift"; path = "Extensions/NSData+JWT.swift"; sourceTree = "<group>"; };
+		DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTAssert+JWT.swift"; sourceTree = "<group>"; };
 		F672EDE11ACB44520020B9BA /* SwiftJWT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftJWT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672EDE51ACB44520020B9BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F672EDE61ACB44520020B9BA /* SwiftJWT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftJWT.h; sourceTree = "<group>"; };
 		F672EDEC1ACB44520020B9BA /* SwiftJWTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftJWTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672EDF21ACB44520020B9BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F672EDF31ACB44520020B9BA /* JWTTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTTests.swift; sourceTree = "<group>"; };
-		F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftJWT.swift; path = ../../SwiftJWT.swift; sourceTree = "<group>"; };
+		F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftJWT.swift; sourceTree = "<group>"; };
 		F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonCrypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6C51F8A1ACB912800B00CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6C51F911ACB912800B00CF7 /* CommonCryptoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonCryptoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +98,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DE183DFA1BEB5CC1000D4544 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DE183DF61BEB4EB4000D4544 /* String+JWT.swift */,
+				DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		F672EDD71ACB44520020B9BA = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +134,7 @@
 			children = (
 				F672EDE61ACB44520020B9BA /* SwiftJWT.h */,
 				F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */,
+				DE183DFA1BEB5CC1000D4544 /* Extensions */,
 				F672EDE41ACB44520020B9BA /* Supporting Files */,
 			);
 			path = JWT;
@@ -136,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				F672EDF31ACB44520020B9BA /* JWTTests.swift */,
+				DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */,
 				F672EDF11ACB44520020B9BA /* Supporting Files */,
 			);
 			path = JWTTests;
@@ -284,6 +301,7 @@
 		F672EDD81ACB44520020B9BA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0710;
 				LastUpgradeCheck = 0620;
 				ORGANIZATIONNAME = "RoundZero bv";
 				TargetAttributes = {
@@ -357,6 +375,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */,
+				DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */,
 				F672EDFE1ACB44650020B9BA /* SwiftJWT.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -366,6 +386,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F672EDF41ACB44520020B9BA /* JWTTests.swift in Sources */,
+				DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

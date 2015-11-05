@@ -13,8 +13,10 @@ Pod::Spec.new do |s|
   s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :branch => "master"}
 
   # https://github.com/stannie/swift-jwt.git git@github.com:stannie/swift-jwt.git
-  s.source_files = "JWT/JWT/*.{swift,h}"
+  s.source_files = "JWT/JWT/**/*.{swift,h}"
   s.requires_arc = true
+
+  s.dependency = "Sodium", '~> 0.1'
 
   # s.frameworks = "CommonCrypto"
 

@@ -10,6 +10,7 @@
 		DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF61BEB4EB4000D4544 /* String+JWT.swift */; };
 		DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */; };
 		DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */; };
+		DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */; };
 		F672EDE71ACB44520020B9BA /* SwiftJWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F672EDE61ACB44520020B9BA /* SwiftJWT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F672EDED1ACB44520020B9BA /* SwiftJWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F672EDE11ACB44520020B9BA /* SwiftJWT.framework */; };
 		F672EDF41ACB44520020B9BA /* JWTTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672EDF31ACB44520020B9BA /* JWTTests.swift */; };
@@ -47,6 +48,7 @@
 		DE183DF61BEB4EB4000D4544 /* String+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+JWT.swift"; path = "Extensions/String+JWT.swift"; sourceTree = "<group>"; };
 		DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "NSData+JWT.swift"; path = "Extensions/NSData+JWT.swift"; sourceTree = "<group>"; };
 		DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTAssert+JWT.swift"; sourceTree = "<group>"; };
+		DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JWTNaCl.swift; sourceTree = "<group>"; };
 		F672EDE11ACB44520020B9BA /* SwiftJWT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftJWT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672EDE51ACB44520020B9BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F672EDE61ACB44520020B9BA /* SwiftJWT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftJWT.h; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 			children = (
 				F672EDE61ACB44520020B9BA /* SwiftJWT.h */,
 				F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */,
+				DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */,
 				DE183DFA1BEB5CC1000D4544 /* Extensions */,
 				F672EDE41ACB44520020B9BA /* Supporting Files */,
 			);
@@ -302,7 +305,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0710;
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "RoundZero bv";
 				TargetAttributes = {
 					F672EDE01ACB44520020B9BA = {
@@ -378,6 +381,7 @@
 				DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */,
 				DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */,
 				F672EDFE1ACB44650020B9BA /* SwiftJWT.swift in Sources */,
+				DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,6 +451,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;

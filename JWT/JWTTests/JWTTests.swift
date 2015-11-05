@@ -95,7 +95,7 @@ class JWTTests: XCTestCase {
         var s = ""
         jwt_dated.body["exp"] = now-100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
+        XCTAssertThrowsSpecificError(JWTError.ExpiredEXP) {
             try jwt.loads(s, verify: true)
             // "exp in past \(s)"
         }
@@ -107,7 +107,7 @@ class JWTTests: XCTestCase {
         }
         jwt_dated.body["nbf"] = now+100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
+        XCTAssertThrowsSpecificError(JWTError.ExpiredNBF) {
             try jwt.loads(s, verify: true)
             // "nbf in future \(s)"
         }
@@ -120,7 +120,7 @@ class JWTTests: XCTestCase {
         
         jwt_dated.body["iat"] = now+100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
+        XCTAssertThrowsSpecificError(JWTError.ExpiredIAT) {
             try jwt.loads(s, verify: true)
             // "iat in future \(s)"
         }

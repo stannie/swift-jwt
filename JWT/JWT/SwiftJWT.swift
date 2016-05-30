@@ -15,6 +15,7 @@ public enum JWTError: ErrorType {
     
     case AlgorithmIsNotWhitelisted
     case VerifyFailed
+    case MandatoryClaimMissing
     case DumpFailed
     
     case ExpiredIAT
@@ -102,6 +103,16 @@ public class JWT {
         guard let payload = try NSJSONSerialization.JSONObjectWithData(body_data, options: NSJSONReadingOptions(rawValue: 0))  as? [String: AnyObject] else {
             
             throw JWTError.DecodeFailed
+        }
+        
+        // check if mandatory claims are set
+        // either in "header" or "body"
+        if mandatory.count > 0 {
+            for claim in mandatory {
+                if header[claim] == nil && payload[claim] == nil {
+                    throw JWTError.MandatoryClaimMissing
+                }
+            }
         }
         
         // all went well so far, so let's set the object properties

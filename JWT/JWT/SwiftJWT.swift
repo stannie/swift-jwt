@@ -48,7 +48,7 @@ public class JWT {
     //        self.init(header: header, body: body, algorithms: nil) {
     //    }
     
-    public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]?) {
+    public init(header: [String: AnyObject], body: [String: AnyObject], algorithms: [String]? = nil) {
         self.header = header
         self.body = body
         if header["alg"] as? String == nil {
@@ -273,7 +273,7 @@ public class JWT {
     
     // TODO: some way to enforce that e.g. iat and nbf are present
     // TODO: verification of iss and aud when given in loads()
-    func verify_content() throws {
+    public func verify_content() throws {
         // internal function to verify the content (header and body) parts of a JWT
         let date = NSDate()
         let now = UInt(date.timeIntervalSince1970)

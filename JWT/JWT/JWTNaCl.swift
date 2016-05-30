@@ -57,7 +57,7 @@ public class JWTNaCl: JWT {
         return false
     }
     
-    override func verify_content() throws {
+    override public func verify_content() throws {
         
         // kid is not optional when using NaCl
         // TIP: use guard statement

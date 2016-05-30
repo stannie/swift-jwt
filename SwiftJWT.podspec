@@ -11,20 +11,24 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = "10.9"
   # s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :tag => s.version}
   s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :branch => "master"}
-
-  # https://github.com/stannie/swift-jwt.git git@github.com:stannie/swift-jwt.git
-  s.source_files = "JWT/JWT/**/*.{swift,h}"
   s.requires_arc = true
-
-  s.dependency = "Sodium", '~> 0.1'
-
-  # s.frameworks = "CommonCrypto"
-
-  # needs https://github.com/jedisct1/swift-sodium checkout 176033d7c1cbc4dfe4bed648aa230c9e14ab9426
-  # but only for the JWTNaCl sub class
-  # s.dependency = "swift-sodium"
 
   # also needs CommonCrypto
   # see http://stackoverflow.com/questions/25248598/importing-commoncrypto-in-a-swift-framework
   # (answer by stephencelis) on how to import
+  # s.frameworks = "CommonCrypto"
+
+  s.subspec 'Core' do |core|
+    core.source_files = "JWT/JWT/**/*.{swift,h}"
+
+    # exclude ed25519 code
+    core.exclude_files = "**/JWTNaCl.swift"
+  end
+
+  s.subspec 'with-ed25519' do |ed25519|
+    ed25519.source_files = "JWT/JWT/**/*.{swift,h}"
+
+    # needed only for the JWTNaCl sub class
+    s.dependency "Sodium", "~> 0.1"
+  end
 end

@@ -182,7 +182,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0710;
-				LastUpgradeCheck = 0710;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "RoundZero bv";
 				TargetAttributes = {
 					F672EDE01ACB44520020B9BA = {
@@ -360,6 +360,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/system",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
 			};
@@ -379,6 +380,7 @@
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/system",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
 			};
@@ -397,6 +399,7 @@
 				);
 				INFOPLIST_FILE = JWTTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
 			};
 			name = Debug;
@@ -410,6 +413,7 @@
 				);
 				INFOPLIST_FILE = JWTTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
 			};
 			name = Release;

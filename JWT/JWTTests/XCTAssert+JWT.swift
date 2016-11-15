@@ -8,7 +8,7 @@
 
 import XCTest
 
-func XCTempAssertNoThrowError(message: String = "", file: StaticString = #file, line: UInt = #line, _ block: () throws -> ())
+func XCTempAssertNoThrowError(_ message: String = "", file: StaticString = #file, line: UInt = #line, _ block: () throws -> ())
 {
     do {try block()}
     catch
@@ -19,7 +19,7 @@ func XCTempAssertNoThrowError(message: String = "", file: StaticString = #file, 
 }
 
 // assert if a method throws the expected ErrorType
-func XCTAssertThrowsSpecificError(kind: ErrorType, _ message: String = "", file: StaticString = #file, line: UInt = #line, _ block: () throws -> ())
+func XCTAssertThrowsSpecificError(_ kind: Error, _ message: String = "", file: StaticString = #file, line: UInt = #line, _ block: () throws -> ())
 {
     do
     {

@@ -65,7 +65,7 @@ class JWTTests: XCTestCase {
     func test_random_string_as_JWT() {
         let jwt = JWT(algorithms: ["HS512","RS512"])
         
-        XCTAssertThrowsSpecificError(JWTError.NotValid) {
+        XCTAssertThrowsSpecificError(JWTError.notValid) {
             try jwt.loads("randomstring", verify: false)
         }
         XCTAssert(jwt.body.count == 0, "loading garbage should leave body empty")
@@ -75,27 +75,27 @@ class JWTTests: XCTestCase {
         let jwt_none_sig = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
         var jwt = JWT(algorithms: ["none","HS512","RS512"])
         
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
+        XCTAssertThrowsSpecificError(JWTError.verifyFailed) {
             try jwt.loads(jwt_none_sig, verify: true)
         }
         XCTAssert(jwt.body.count == 0, "loading garbage should leave body empty")
         
         jwt = JWT(algorithms: ["HS512","RS512"])
         
-        XCTAssertThrowsSpecificError(JWTError.AlgorithmIsNotWhitelisted) {
+        XCTAssertThrowsSpecificError(JWTError.algorithmIsNotWhitelisted) {
             try jwt.loads(jwt_none_sig, verify: false)
         }
     }
 
     func test_timestamps() {
-        let date = NSDate()
+        let date = Date()
         let now = UInt(date.timeIntervalSince1970)
         let jwt = JWT(algorithms: ["none","HS512","RS512"])
         let jwt_dated = JWT(algorithms: ["none","HS512","RS512"])
         var s = ""
         jwt_dated.body["exp"] = now-100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.ExpiredEXP) {
+        XCTAssertThrowsSpecificError(JWTError.expiredEXP) {
             try jwt.loads(s, verify: true)
             // "exp in past \(s)"
         }
@@ -107,7 +107,7 @@ class JWTTests: XCTestCase {
         }
         jwt_dated.body["nbf"] = now+100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.ExpiredNBF) {
+        XCTAssertThrowsSpecificError(JWTError.expiredNBF) {
             try jwt.loads(s, verify: true)
             // "nbf in future \(s)"
         }
@@ -120,7 +120,7 @@ class JWTTests: XCTestCase {
         
         jwt_dated.body["iat"] = now+100
         s = try! jwt_dated.dumps()
-        XCTAssertThrowsSpecificError(JWTError.ExpiredIAT) {
+        XCTAssertThrowsSpecificError(JWTError.expiredIAT) {
             try jwt.loads(s, verify: true)
             // "iat in future \(s)"
         }
@@ -136,27 +136,34 @@ class JWTTests: XCTestCase {
         let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiYUJHb3dQSGNJdHBvdmVWenJyUXNTbms2NWNfcWhLdmZqZC00d3lQVWZVUSJ9.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOlwvXC81LWRvdC1hdXRoZW50aXFpby5hcHBzcG90LmNvbSIsInN1YiI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEiLCJ0eXBlIjoibW9iaWxlIn0.kD4YcuAb7v3cxlRZTrUbew1lWiY3G8uEmRguizy1KJs"
         // generate keys
         let sodium = Sodium()!
-        let seed = NSMutableData(length: sodium.sign.SeedBytes)!
-        SecRandomCopyBytes(kSecRandomDefault, sodium.sign.SeedBytes, UnsafeMutablePointer<UInt8>(seed.mutableBytes))
-        let kpp = sodium.sign.keyPair(seed: seed)
+        var seed = Data(count: sodium.sign.SeedBytes)
+        _ = seed.withUnsafeMutableBytes { mutableBytes in
+            SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
+        }
+        
+        let kpp = sodium.sign.keyPair(seed: seed as NSData)
         XCTAssert(kpp != nil, "Key pair generation")
         let kp = kpp!
         var jwt = JWTNaCl(algorithms: ["Ed25519"])
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
-            try jwt.loads(jwt_ed, key: kp.publicKey, verify: true)
+        XCTAssertThrowsSpecificError(JWTError.verifyFailed) {
+            try jwt.loads(jwt_ed,
+                          key: kp.publicKey as Data,
+                          verify: true)
             // "NaCl JWT should not validate with wrong key")
         }
         
         // but is still loaded (DO WE WANT THAT?) NOW FAILS
         jwt = JWTNaCl(header: ["alg":"Ed25519","kid":"XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"], body: ["hello":"world"], algorithms: ["Ed25519"])
-        let jwt_str = try! jwt.dumps(kp.secretKey) // valid Ed25519 signed token
-        XCTAssertThrowsSpecificError(JWTError.VerifyFailed) {
+        let jwt_str = try! jwt.dumps(kp.secretKey as Data) // valid Ed25519 signed token
+        XCTAssertThrowsSpecificError(JWTError.verifyFailed) {
             try jwt.loads(jwt_str, verify: true)
             //"verify a generated JWT with wrong kid when signed with fresh key")
         }
         
         XCTempAssertNoThrowError("verify a generated JWT with its public key") {
-            try jwt.loads(jwt_str, key: kp.publicKey, verify: true)
+            try jwt.loads(jwt_str,
+                          key: kp.publicKey as Data,
+                          verify: true)
         }
     }
 
@@ -164,9 +171,12 @@ class JWTTests: XCTestCase {
         let jwt_hs256 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEifQ.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOi8vNS1kb3QtYXV0aGVudGlxaW8uYXBwc3BvdC5jb20iLCJzdWIiOiJhQkdvd1BIY0l0cG92ZVZ6cnJRc1NuazY1Y19xaEt2ZmpkLTR3eVBVZlVRIiwidHlwZSI6Im1vYmlsZSJ9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
         // generate keys
         let sodium = Sodium()!
-        let seed = NSMutableData(length: sodium.sign.SeedBytes)!
-        SecRandomCopyBytes(kSecRandomDefault, sodium.sign.SeedBytes, UnsafeMutablePointer<UInt8>(seed.mutableBytes))
-        let kpp = sodium.sign.keyPair(seed: seed)
+        var seed = Data(count: sodium.sign.SeedBytes)
+        _ = seed.withUnsafeMutableBytes { mutableBytes in
+            SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
+        }
+        
+        let kpp = sodium.sign.keyPair(seed: seed as NSData)
         XCTAssert(kpp != nil, "Key pair generation")
         let kp = kpp!
 
@@ -183,10 +193,12 @@ class JWTTests: XCTestCase {
         // try! jwtn.dumps("secret") // THIS -> nil ; WHY?
         
         XCTempAssertNoThrowError("could not stringify a HS256 JWT") {
-            let myjwt = try jwtn.dumps(kp.secretKey) // valid Ed25519 signed token
+            let myjwt = try jwtn.dumps(kp.secretKey as Data) // valid Ed25519 signed token
             
             XCTempAssertNoThrowError("loading of generated Ed25519 JWT failed") {
-                try jwtn.loads(myjwt, key: kp.publicKey, verify: true)
+                try jwtn.loads(myjwt,
+                               key: kp.publicKey as Data,
+                               verify: true)
             }
         }
     }
@@ -196,7 +208,7 @@ class JWTTests: XCTestCase {
         let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiWE43VnBFWDF1Q3h4aHZ3VXVhY1lodVU5dDZ1eGdMYWhSaUxlU0VIRU5payJ9.eyJmb28iOiJiYXIifQ.a2dDcKXByKxiouOLnXUm7YUKHMGOU3yn_g91C90e8YmKjlF1_9ylAKukfMm6Y6WS3dZp2ysaglzzTnVxnRYyDQ"
         let pk = "XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"
         let jwt = JWTNaCl(algorithms: ["Ed25519"])
-        self.measureBlock() {
+        self.measure() {
             let _ = try! jwt.loads(jwt_ed, b64key: pk, verify: true)
         }
     }

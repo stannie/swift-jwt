@@ -11,15 +11,15 @@ import Foundation
 extension String {
     
     // MARK: - base64 extensions
-    func base64SafeUrlDecode() -> NSData {
+    func base64SafeUrlDecode() -> Data {
         return self.base64SafeUrlDecode([])
     }
     
-    func base64SafeUrlDecode(options: NSDataBase64DecodingOptions) -> NSData {
+    func base64SafeUrlDecode(_ options: NSData.Base64DecodingOptions) -> Data {
         var s: String = self;
         
-        s = s.stringByReplacingOccurrencesOfString("-", withString: "+") // 62nd char of encoding
-        s = s.stringByReplacingOccurrencesOfString("_", withString: "/") // 63rd char of encoding
+        s = s.replacingOccurrences(of: "-", with: "+") // 62nd char of encoding
+        s = s.replacingOccurrences(of: "_", with: "/") // 63rd char of encoding
         
         switch (s.characters.count % 4) {     // Pad with trailing '='s
         case 0: break; // No pad chars in this case
@@ -28,6 +28,6 @@ extension String {
         default: print("Illegal base64url string!")
         }
         
-        return NSData(base64EncodedString: s, options: options)!
+        return Data(base64Encoded: s, options: options)!
     }
 }

@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.authors     = { "Stan P. van de Burgt" => "stan@vandeburgt.com" }
   s.social_media_url = 'https://twitter.com/stannie'
 
-  s.ios.deployment_target = "8.0"
+  s.ios.deployment_target = "9.0"
   s.osx.deployment_target = "10.9"
   # s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :tag => s.version}
   s.source   = { :git => "git://github.com/stannie/swift-jwt.git", :branch => "master"}
@@ -29,6 +29,6 @@ Pod::Spec.new do |s|
     ed25519.source_files = "JWT/JWT/**/*.{swift,h}"
 
     # needed only for the JWTNaCl sub class
-    s.dependency "Sodium", "~> 0.1"
+    s.dependency "Sodium", "~> 0.2"
   end
 end

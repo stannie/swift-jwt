@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF61BEB4EB4000D4544 /* String+JWT.swift */; };
-		DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */; };
+		DE183DF91BEB4EDC000D4544 /* Data+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */; };
 		DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */; };
 		DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */; };
 		F672EDE71ACB44520020B9BA /* SwiftJWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F672EDE61ACB44520020B9BA /* SwiftJWT.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -29,7 +29,7 @@
 
 /* Begin PBXFileReference section */
 		DE183DF61BEB4EB4000D4544 /* String+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+JWT.swift"; path = "Extensions/String+JWT.swift"; sourceTree = "<group>"; };
-		DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "NSData+JWT.swift"; path = "Extensions/NSData+JWT.swift"; sourceTree = "<group>"; };
+		DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Data+JWT.swift"; path = "Extensions/Data+JWT.swift"; sourceTree = "<group>"; };
 		DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTAssert+JWT.swift"; sourceTree = "<group>"; };
 		DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JWTNaCl.swift; sourceTree = "<group>"; };
 		F672EDE11ACB44520020B9BA /* SwiftJWT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftJWT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				DE183DF61BEB4EB4000D4544 /* String+JWT.swift */,
-				DE183DF81BEB4EDC000D4544 /* NSData+JWT.swift */,
+				DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -182,14 +182,16 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0710;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = "RoundZero bv";
 				TargetAttributes = {
 					F672EDE01ACB44520020B9BA = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 0810;
 					};
 					F672EDEB1ACB44520020B9BA = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 0810;
 					};
 				};
 			};
@@ -233,7 +235,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE183DF91BEB4EDC000D4544 /* NSData+JWT.swift in Sources */,
+				DE183DF91BEB4EDC000D4544 /* Data+JWT.swift in Sources */,
 				DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */,
 				F672EDFE1ACB44650020B9BA /* SwiftJWT.swift in Sources */,
 				DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */,
@@ -273,8 +275,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -284,6 +288,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -320,8 +325,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -330,6 +337,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -339,6 +347,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -349,6 +358,7 @@
 		F672EDF81ACB44520020B9BA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -363,12 +373,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		F672EDF91ACB44520020B9BA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -383,6 +395,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -401,6 +414,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -415,6 +429,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

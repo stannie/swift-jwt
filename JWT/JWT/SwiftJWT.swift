@@ -40,7 +40,7 @@ open class JWT {
     open var body: [AnyHashable: Any] = [:]  // JWT payload
     var algorithms: [String] = []               // algorithms that are valid on loads(), dumps() and setting 'alg' header
     
-    public init(algorithms: [String]) {
+    public required init(algorithms: [String]) {
         self.algorithms = implemented(algorithms) // only add algoritms that are implemented()
     }
     

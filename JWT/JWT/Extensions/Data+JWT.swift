@@ -10,19 +10,15 @@ import Foundation
 
 extension Data {
     // MARK: - base64 extensions
-    func base64SafeUrlEncode() -> String {
-        return self.base64SafeUrlEncode([])
-    }
-    
-    func base64SafeUrlEncode(_ options: NSData.Base64EncodingOptions) -> String {
+    func base64SafeUrlEncode(_ options: Data.Base64EncodingOptions = []) -> String {
         // regular base64 encoding
-        var s: String = self.base64EncodedString(options: options)
+        var s = self.base64EncodedString(options: options)
         
         // s = s.substringToIndex(s.endIndex.predecessor()) // remove last char
         s = s.replacingOccurrences(of: "=", with: "") // Remove any trailing '='s
         s = s.replacingOccurrences(of: "+", with: "-") // 62nd char of encoding
         s = s.replacingOccurrences(of: "/", with: "_") // 63rd char of encoding
         
-        return s;
+        return s
     }
 }

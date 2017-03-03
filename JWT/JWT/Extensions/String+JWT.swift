@@ -11,12 +11,8 @@ import Foundation
 extension String {
     
     // MARK: - base64 extensions
-    func base64SafeUrlDecode() -> Data {
-        return self.base64SafeUrlDecode([])
-    }
-    
-    func base64SafeUrlDecode(_ options: NSData.Base64DecodingOptions) -> Data {
-        var s: String = self;
+    func base64SafeUrlDecode(_ options: Data.Base64DecodingOptions = []) -> Data? {
+        var s = self
         
         s = s.replacingOccurrences(of: "-", with: "+") // 62nd char of encoding
         s = s.replacingOccurrences(of: "_", with: "/") // 63rd char of encoding
@@ -28,6 +24,6 @@ extension String {
         default: print("Illegal base64url string!")
         }
         
-        return Data(base64Encoded: s, options: options)!
+        return NSData(base64Encoded: s, options: options) as? Data
     }
 }

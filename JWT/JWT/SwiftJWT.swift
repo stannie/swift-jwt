@@ -85,9 +85,9 @@ open class JWT {
         }
         
         // decode the header (a URL-safe, base 64 encoded JSON dict) from 1st part
-        let hdr_data = parts[0].base64SafeUrlDecode()
-        guard let hdr = try JSONSerialization.jsonObject(with: hdr_data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [AnyHashable: Any] else {
-            
+        guard let hdr_data = parts[0].base64SafeUrlDecode(),
+            let hdr = try JSONSerialization.jsonObject(with: hdr_data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [AnyHashable: Any]
+        else {
             throw JWTError.decodeFailed
         }
         
@@ -99,9 +99,9 @@ open class JWT {
         }
         
         // decode the body (a URL-safe base 64 encoded JSON dict) from the 2nd part
-        let body_data = parts[1].base64SafeUrlDecode()
-        guard let payload = try JSONSerialization.jsonObject(with: body_data, options: JSONSerialization.ReadingOptions(rawValue: 0))  as? [AnyHashable: Any] else {
-            
+        guard let body_data = parts[1].base64SafeUrlDecode(),
+            let payload = try JSONSerialization.jsonObject(with: body_data, options: JSONSerialization.ReadingOptions(rawValue: 0))  as? [AnyHashable: Any]
+        else {
             throw JWTError.decodeFailed
         }
         
@@ -144,7 +144,7 @@ open class JWT {
     
     // convenience method for plain strings as key
     open func loads(_ jwt: String, key: String, verify: Bool = true, mandatory: [String] = []) throws {
-        let key_raw = key.data(using: String.Encoding.utf8)!
+        let key_raw = key.data(using: .utf8)!
         try loads(jwt, key: key_raw, verify: verify, mandatory: mandatory)
     }
     

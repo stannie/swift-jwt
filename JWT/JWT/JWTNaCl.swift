@@ -43,8 +43,9 @@ open class JWTNaCl: JWT {
         if algorithm == "Ed25519" {
             if key == nil {
                 // use the "kid" field as base64 key string as key if no key provided.
-                if let kid = header["kid"] as? String {
-                    return msg.nacl_verify(signature, key: kid.base64SafeUrlDecode())
+                if let kid = header["kid"] as? String,
+                    let b64key = kid.base64SafeUrlDecode() {
+                    return msg.nacl_verify(signature, key: b64key)
                 }
             }
             else {
@@ -62,16 +63,17 @@ open class JWTNaCl: JWT {
         // kid is not optional when using NaCl
         // TIP: use guard statement
         guard let kid = self.header["kid"] as? String,
-            kid.base64SafeUrlDecode([]).count == 32
+            let kidData = kid.base64SafeUrlDecode(),
+            kidData.count == 32
         else {
             throw JWTNaClError.invalidKid
         }
         
-        if let sub = self.body["sub"] as? String {
-            let id = sub.base64SafeUrlDecode([])
-            if id.count != 32 {
-                throw JWTNaClError.invalidSub
-            }
+        if let sub = self.body["sub"] as? String,
+            let id = sub.base64SafeUrlDecode(),
+            id.count != 32
+        {
+            throw JWTNaClError.invalidSub
         }
         
         try super.verify_content() // run the parent tests too
@@ -167,8 +169,9 @@ extension Data {
     }
     func nacl_verify(_ signature: String, key: Data) -> Bool {
         // key is pubkey
-        if let sodium = Sodium() {
+        if let sodium = Sodium(),
             let sig_raw = signature.base64SafeUrlDecode()
+        {
             return sodium.sign.verify(message: (self as NSData),
                                       publicKey: (key as NSData),
                                       signature: (sig_raw as NSData))

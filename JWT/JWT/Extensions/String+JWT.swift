@@ -24,6 +24,6 @@ extension String {
         default: print("Illegal base64url string!")
         }
         
-        return NSData(base64Encoded: s, options: options) as? Data
+        return Data(base64Encoded: s, options: options)
     }
 }

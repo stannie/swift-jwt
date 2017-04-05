@@ -161,7 +161,7 @@ extension Data {
         // key is privkey
         let sodium = Sodium()
         if let sig = sodium?.sign.signature(message: (self as NSData),
-                                            secretKey: (key as NSData)) as? Data
+                                            secretKey: (key as NSData)) as Data?
         {
             return sig.base64SafeUrlEncode()
         }

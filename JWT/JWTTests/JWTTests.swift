@@ -141,7 +141,7 @@ class JWTTests: XCTestCase {
             SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
         }
         
-        let kpp = sodium.sign.keyPair(seed: seed as NSData)
+        let kpp = sodium.sign.keyPair(seed: seed)
         XCTAssert(kpp != nil, "Key pair generation")
         let kp = kpp!
         var jwt = JWTNaCl(algorithms: ["Ed25519"])
@@ -176,9 +176,10 @@ class JWTTests: XCTestCase {
             SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
         }
         
-        let kpp = sodium.sign.keyPair(seed: seed as NSData)
-        XCTAssert(kpp != nil, "Key pair generation")
-        let kp = kpp!
+        guard let kp = sodium.sign.keyPair(seed: seed) else {
+            XCTFail("Key pair generation")
+            return
+        }
 
         let jwtn = JWTNaCl(algorithms: ["Ed25519","HS256"])
         XCTempAssertNoThrowError("could not load a HS256 JWT") {
@@ -186,18 +187,18 @@ class JWTTests: XCTestCase {
         }
         
         XCTempAssertNoThrowError("could not stringify a HS256 JWT") {
-            try jwtn.dumps("secret")
+            _ = try jwtn.dumps("secret")
         }
         
         jwtn.header["alg"] = "Ed25519" // set alg to NaCl type tokens
         // try! jwtn.dumps("secret") // THIS -> nil ; WHY?
         
         XCTempAssertNoThrowError("could not stringify a HS256 JWT") {
-            let myjwt = try jwtn.dumps(kp.secretKey as Data) // valid Ed25519 signed token
+            let myjwt = try jwtn.dumps(kp.secretKey) // valid Ed25519 signed token
             
             XCTempAssertNoThrowError("loading of generated Ed25519 JWT failed") {
                 try jwtn.loads(myjwt,
-                               key: kp.publicKey as Data,
+                               key: kp.publicKey,
                                verify: true)
             }
         }

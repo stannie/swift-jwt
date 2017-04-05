@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name        = "SwiftJWT"
-  s.version     = "0.5"
+  s.version     = "0.6"
   s.summary     = "a JSON Web Token implementation in Swift on iOS & OSX"
   s.homepage    = "git://github.com/stannie/swift-jwt"
   s.license     = { :type => "MIT", :file => 'LICENSE' }
@@ -29,6 +29,6 @@ Pod::Spec.new do |s|
     ed25519.source_files = "JWT/JWT/**/*.{swift,h}"
 
     # needed only for the JWTNaCl sub class
-    s.dependency "Sodium", "~> 0.2"
+    s.dependency "Sodium", "~> 0.3"
   end
 end

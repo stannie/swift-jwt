@@ -1,5 +1,3 @@
-// Playground - noun: a place where people can play
-
 /*:
  ### Table of Contents
  
@@ -25,7 +23,7 @@ do {
     print(jwt.body)
 
     let new_jwt = try jwt.dumps("geheim")
-    
+
     assert(jwt_str != new_jwt)
 
 } catch {
@@ -40,11 +38,11 @@ do {
  */
 
 jwt = JWT(header: ["alg":"HS256"],
-            body: [
-                "sub": "1234567890",
-                "name": "John Doe",
-                "admin": true
-            ], algorithms: nil)
+          body: [
+            "sub": "1234567890",
+            "name": "John Doe",
+            "admin": true
+    ], algorithms: nil)
 
 do {
     print(try jwt.dumps("secret"))
@@ -69,11 +67,13 @@ jwt = JWTNaCl(algorithms: ["Ed25519"])
 
 do {
     try jwt.loads(jwt_ed, verify: false, mandatory: ["foo"])
-    
+
     print(jwt.header)
     print(jwt.body)
-    
+
 } catch {
     print(error)
     print("Validate of SignedJWT failed")
 }
+
+

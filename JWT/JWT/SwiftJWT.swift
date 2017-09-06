@@ -23,13 +23,13 @@ public enum JWTError: Error {
     case expiredEXP
 }
 
-open class JWT {
+public class JWT {
     // https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-4
     // base class; supports alg: none, HS256, HS384, HS512
     // TODO: add support for RS256, RS384, RS512 (almost there!)
     // TODO: add support for PS256, PS384, PS512
     
-    open var header: [AnyHashable: Any] = ["alg": "none", "typ": "JWT"] {
+    public var header: [AnyHashable: Any] = ["alg": "none", "typ": "JWT"] {
         // JWT header
         didSet {
             if header["alg"] as? String == nil {
@@ -37,7 +37,7 @@ open class JWT {
             }
         }
     }
-    open var body: [AnyHashable: Any] = [:]  // JWT payload
+    public var body: [AnyHashable: Any] = [:]  // JWT payload
     var algorithms: [String] = []               // algorithms that are valid on loads(), dumps() and setting 'alg' header
     
     public required init(algorithms: [String]) {
@@ -66,7 +66,7 @@ open class JWT {
         }
     }
     
-    open func loads(_ jwt: String, key: Data? = nil, verify: Bool = true, mandatory: [String] = []) throws {
+    public func loads(_ jwt: String, key: Data? = nil, verify: Bool = true, mandatory: [String] = []) throws {
         
         // load a JWT string into this object
         var sig = ""
@@ -143,18 +143,18 @@ open class JWT {
     }
     
     // convenience method for plain strings as key
-    open func loads(_ jwt: String, key: String, verify: Bool = true, mandatory: [String] = []) throws {
+    public func loads(_ jwt: String, key: String, verify: Bool = true, mandatory: [String] = []) throws {
         let key_raw = key.data(using: .utf8)!
         try loads(jwt, key: key_raw, verify: verify, mandatory: mandatory)
     }
     
     // convenience method for base64 strings as key
-    open func loads(_ jwt: String, b64key: String, verify: Bool = true, mandatory: [String] = []) throws {
+    public func loads(_ jwt: String, b64key: String, verify: Bool = true, mandatory: [String] = []) throws {
         let key_raw = b64key.base64SafeUrlDecode()
         try loads(jwt, key: key_raw, verify: verify, mandatory: mandatory)
     }
     
-    open func dumps(_ key: Data? = nil, jti_len: UInt = 16) throws -> String {
+    public func dumps(_ key: Data? = nil, jti_len: UInt = 16) throws -> String {
         
         // create a JWT string from this object
         // TODO: some way to indicate that some fields should be generated, next to jti; e.g. nbf and iat
@@ -202,7 +202,7 @@ open class JWT {
     }
     
     // convenience method for plain strings as key
-    open func dumps(_ key: String, jti_len: UInt = 16) throws -> String {
+    public func dumps(_ key: String, jti_len: UInt = 16) throws -> String {
         let key_raw = key.data(using: String.Encoding.utf8)!
         return try dumps(key_raw, jti_len: jti_len)
     }
@@ -280,7 +280,7 @@ open class JWT {
     
     // TODO: some way to enforce that e.g. iat and nbf are present
     // TODO: verification of iss and aud when given in loads()
-    open func verify_content() throws {
+    public func verify_content() throws {
         // internal function to verify the content (header and body) parts of a JWT
         let date = Date()
         let now = UInt(date.timeIntervalSince1970)

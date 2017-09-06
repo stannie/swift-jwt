@@ -14,9 +14,9 @@ public enum JWTNaClError: Error {
     case invalidSub
 }
 
-open class JWTNaCl: JWT {
+public class JWTNaCl: JWT {
     
-    open func _kid(_ key: Data) -> String {
+    public func _kid(_ key: Data) -> String {
         return key.base64SafeUrlEncode()
     }
     

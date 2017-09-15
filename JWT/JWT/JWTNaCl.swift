@@ -159,8 +159,9 @@ extension Data {
     
     func nacl_signature(_ key: Data) -> String! {
         // key is privkey
+        
         let sodium = Sodium()
-        if let sig = sodium?.sign.signature(message: self,
+        if let sig = sodium.sign.signature(message: self,
                                             secretKey: key)
         {
             return sig.base64SafeUrlEncode()
@@ -169,9 +170,9 @@ extension Data {
     }
     func nacl_verify(_ signature: String, key: Data) -> Bool {
         // key is pubkey
-        if let sodium = Sodium(),
-            let sig_raw = signature.base64SafeUrlDecode()
-        {
+        
+        let sodium = Sodium()
+        if let sig_raw = signature.base64SafeUrlDecode() {
             return sodium.sign.verify(message: self,
                                       publicKey: key,
                                       signature: sig_raw)

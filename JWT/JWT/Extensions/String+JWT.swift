@@ -17,7 +17,7 @@ extension String {
         s = s.replacingOccurrences(of: "-", with: "+") // 62nd char of encoding
         s = s.replacingOccurrences(of: "_", with: "/") // 63rd char of encoding
         
-        switch (s.characters.count % 4) {     // Pad with trailing '='s
+        switch (s.count % 4) {     // Pad with trailing '='s
         case 0: break; // No pad chars in this case
         case 2: s += "=="; break; // Two pad chars
         case 3: s += "="; break; // One pad char

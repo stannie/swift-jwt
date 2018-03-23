@@ -203,7 +203,7 @@ public class JWT {
     
     // convenience method for plain strings as key
     public func dumps(_ key: String, jti_len: UInt = 16) throws -> String {
-        let key_raw = key.data(using: String.Encoding.utf8)!
+        let key_raw = key.base64SafeUrlDecode(.ignoreUnknownCharacters)
         return try dumps(key_raw, jti_len: jti_len)
     }
     

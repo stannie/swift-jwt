@@ -6,6 +6,9 @@
 //  (c) RoundZero 2015
 //  Project Authentiq
 
+import Sodium
+import CommonCrypto
+
 // MARK: - NaCl signatures
 // subclass with additional sign/verify for "Ed25519" signatures
 
@@ -131,12 +134,7 @@ enum HMACAlgorithm {
 }
 
 // See http://stackoverflow.com/questions/21724337/signing-and-verifying-on-ios-using-rsa on RSA signing
-
-
-import Sodium   // swift wrapper of LibSodium, a NaCl implementation https://github.com/jedisct1/swift-sodium
-
 extension Data {
-    
     func base64digest(_ algorithm: HMACAlgorithm, key: Data) -> String! {
         let digestLen = algorithm.digestLength()
         
@@ -161,21 +159,22 @@ extension Data {
         // key is privkey
         
         let sodium = Sodium()
-        if let sig = sodium.sign.signature(message: self,
-                                            secretKey: key)
+        if let sig = sodium.sign.signature(message: Bytes(self),
+                                            secretKey: Bytes(key))
         {
-            return sig.base64SafeUrlEncode()
+            return Data(bytes: sig).base64SafeUrlEncode()
         }
         return nil
     }
+
     func nacl_verify(_ signature: String, key: Data) -> Bool {
         // key is pubkey
         
         let sodium = Sodium()
         if let sig_raw = signature.base64SafeUrlDecode() {
-            return sodium.sign.verify(message: self,
-                                      publicKey: key,
-                                      signature: sig_raw)
+            return sodium.sign.verify(message: Bytes(self),
+                                      publicKey: Bytes(key),
+                                      signature: Bytes(sig_raw))
         }
         return false
     }

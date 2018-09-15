@@ -136,25 +136,21 @@ class JWTTests: XCTestCase {
         let jwt_ed = "eyJhbGciOiJFZDI1NTE5IiwidHlwIjoiSldUIiwia2lkIjoiYUJHb3dQSGNJdHBvdmVWenJyUXNTbms2NWNfcWhLdmZqZC00d3lQVWZVUSJ9.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOlwvXC81LWRvdC1hdXRoZW50aXFpby5hcHBzcG90LmNvbSIsInN1YiI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEiLCJ0eXBlIjoibW9iaWxlIn0.kD4YcuAb7v3cxlRZTrUbew1lWiY3G8uEmRguizy1KJs"
         // generate keys
         let sodium = Sodium()
-        var seed = Data(count: sodium.sign.SeedBytes)
-        _ = seed.withUnsafeMutableBytes { mutableBytes in
-            SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
-        }
-        
-        let kpp = sodium.sign.keyPair(seed: seed)
+
+        let kpp = sodium.sign.keyPair()
         XCTAssert(kpp != nil, "Key pair generation")
         let kp = kpp!
         var jwt = JWTNaCl(algorithms: ["Ed25519"])
         XCTAssertThrowsSpecificError(JWTError.verifyFailed) {
             try jwt.loads(jwt_ed,
-                          key: kp.publicKey as Data,
+                          key: Data(bytes: kp.publicKey),
                           verify: true)
             // "NaCl JWT should not validate with wrong key")
         }
         
         // but is still loaded (DO WE WANT THAT?) NOW FAILS
         jwt = JWTNaCl(header: ["alg":"Ed25519","kid":"XN7VpEX1uCxxhvwUuacYhuU9t6uxgLahRiLeSEHENik"], body: ["hello":"world"], algorithms: ["Ed25519"])
-        let jwt_str = try! jwt.dumps(kp.secretKey as Data) // valid Ed25519 signed token
+        let jwt_str = try! jwt.dumps(Data(bytes: kp.secretKey)) // valid Ed25519 signed token
         XCTAssertThrowsSpecificError(JWTError.verifyFailed) {
             try jwt.loads(jwt_str, verify: true)
             //"verify a generated JWT with wrong kid when signed with fresh key")
@@ -162,7 +158,7 @@ class JWTTests: XCTestCase {
         
         XCTempAssertNoThrowError("verify a generated JWT with its public key") {
             try jwt.loads(jwt_str,
-                          key: kp.publicKey as Data,
+                          key: Data(bytes: kp.publicKey),
                           verify: true)
         }
     }
@@ -171,12 +167,8 @@ class JWTTests: XCTestCase {
         let jwt_hs256 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFCR293UEhjSXRwb3ZlVnpyclFzU25rNjVjX3FoS3ZmamQtNHd5UFVmVVEifQ.eyJwaG9uZV9udW1iZXIiOiIrMzA2OTQ3ODk4NjA1Iiwic2NvcGUiOiJwaG9uZSIsImF1ZCI6Imh0dHBzOi8vNS1kb3QtYXV0aGVudGlxaW8uYXBwc3BvdC5jb20iLCJzdWIiOiJhQkdvd1BIY0l0cG92ZVZ6cnJRc1NuazY1Y19xaEt2ZmpkLTR3eVBVZlVRIiwidHlwZSI6Im1vYmlsZSJ9.qrq-939iZydNFdNsTosbSteghjc2VcK9EZVklxfQgiU"
         // generate keys
         let sodium = Sodium()
-        var seed = Data(count: sodium.sign.SeedBytes)
-        _ = seed.withUnsafeMutableBytes { mutableBytes in
-            SecRandomCopyBytes(kSecRandomDefault, seed.count, mutableBytes)
-        }
-        
-        guard let kp = sodium.sign.keyPair(seed: seed) else {
+
+        guard let kp = sodium.sign.keyPair() else {
             XCTFail("Key pair generation")
             return
         }
@@ -194,11 +186,11 @@ class JWTTests: XCTestCase {
         // try! jwtn.dumps("secret") // THIS -> nil ; WHY?
         
         XCTempAssertNoThrowError("could not stringify a HS256 JWT") {
-            let myjwt = try jwtn.dumps(kp.secretKey) // valid Ed25519 signed token
+            let myjwt = try jwtn.dumps(Data(bytes: kp.secretKey)) // valid Ed25519 signed token
             
             XCTempAssertNoThrowError("loading of generated Ed25519 JWT failed") {
                 try jwtn.loads(myjwt,
-                               key: kp.publicKey,
+                               key: Data(bytes: kp.publicKey),
                                verify: true)
             }
         }

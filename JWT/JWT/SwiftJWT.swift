@@ -165,8 +165,9 @@ public class JWT {
             // https://developer.apple.com/library/ios/documentation/Security/Reference/RandomizationReference/index.html
             
             var bytes = Data(count: Int(jti_len))
+            let count = bytes.count
             let result = bytes.withUnsafeMutableBytes { mutableBytes in
-                SecRandomCopyBytes(kSecRandomDefault, bytes.count, mutableBytes)
+                SecRandomCopyBytes(kSecRandomDefault, count, mutableBytes)
             }
             
             if result == errSecSuccess {

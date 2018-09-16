@@ -19,10 +19,7 @@ Pod::Spec.new do |s|
   # s.frameworks = "CommonCrypto"
 
   s.preserve_paths = "Build-Phases/*.sh"
-  
-  s.pod_target_xcconfig = {
-    "SWIFT_INCLUDE_PATHS" => "$(PODS_ROOT)/SwiftJWT/",
-  }
+  s.script_phase = { :name => "CommonCrypto", :script => "sh $SRCROOT/SwiftJWT/Build-Phases/common-crypto.sh", :execution_position => :before_compile }
 
   s.default_subspec = 'Core'
 
@@ -31,16 +28,11 @@ Pod::Spec.new do |s|
 
     # exclude ed25519 code
     core.exclude_files = "**/JWTNaCl.swift"
-
-    core.script_phase = { :name => "CommonCrypto", :script => "sh $SRCROOT/SwiftJWT/Build-Phases/common-crypto.sh", :execution_position => :before_compile }
   end
 
   s.subspec 'with-ed25519' do |ed25519|
     ed25519.source_files = "JWT/JWT/**/*.{swift,h}"
     
-    ed25519.preserve_paths = "Build-Phases/*.sh"
-    ed25519.script_phase = { :name => "CommonCrypto", :script => "sh $SRCROOT/SwiftJWT/Build-Phases/common-crypto.sh", :execution_position => :before_compile }
-
     # needed only for the JWTNaCl sub class
     s.dependency "Sodium"
   end

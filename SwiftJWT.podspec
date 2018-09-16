@@ -42,6 +42,6 @@ Pod::Spec.new do |s|
     ed25519.script_phase = { :name => "CommonCrypto", :script => "sh $SRCROOT/SwiftJWT/Build-Phases/common-crypto.sh", :execution_position => :before_compile }
 
     # needed only for the JWTNaCl sub class
-    s.dependency "Sodium", "~> 0.6"
+    s.dependency "Sodium", :git => 'https://github.com/jedisct1/swift-sodium.git', :branch => 'master'
   end
 end

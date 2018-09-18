@@ -56,11 +56,3 @@ jwt = JWT(header: ["alg":"HS256"],
     ], algorithms: nil)
 println(jwt.dumps("secret")!)
 ```
-
-# The Bridging Header
-
-CommonCrypto is not a modular header in Xcode 7. This makes it very challenging to import into Swift. To work around this, the necessary header files have been copied into SwiftJWT.h, which needs to be bridged into Swift. You can do this either by using SwiftJWT as a framework, adding #import "SwiftJWT/SwiftJWT.h" to your existing bridging header, or making SwiftJWT/SwiftJWT.h your bridging header in Build Settings, "Objective-C Bridging Header."
-
-Hopefully Apple will make CommonCrypto a modular header soon. When this happens, the bridging header will not be needed, and SwiftJWT can be a single file.
-
-Credits for the Bridging header tip to [RNCryptor](https://github.com/RNCryptor/RNCryptor#the-bridging-header).

@@ -13,7 +13,3 @@ FOUNDATION_EXPORT double SwiftJWTVersionNumber;
 
 //! Project version string for SwiftJWT.
 FOUNDATION_EXPORT const unsigned char SwiftJWTVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <JWT/PublicHeader.h>
-
-

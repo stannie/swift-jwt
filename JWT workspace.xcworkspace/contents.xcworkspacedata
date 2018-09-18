@@ -2,10 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:MyPlayground.playground">
-   </FileRef>
-   <FileRef
-      location = "group:JWT/JWT/../../JWT-Playground.playground">
+      location = "group:JWT-Playground.playground">
    </FileRef>
    <FileRef
       location = "group:JWT/SwiftJWT.xcodeproj">

@@ -3,6 +3,23 @@ Swift Framework for JWT (JSON Web Token)
 
 Created for Authentiq ID
 
+## Installation
+
+### Available in CocoaPods
+
+SwiftJWT is available through [CocoaPods](http://cocoapods.org). To install it, simply add the following line to your Podfile:
+
+```objc
+pod "SwiftJWT"
+```
+
+In case you want to use the project with `Ed25519` algorithm support, you can install it using:
+
+```objc
+pod "SwiftJWT/with-ed25519"
+```
+
+
 ## Examples
 
 ```Swift

@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF61BEB4EB4000D4544 /* String+JWT.swift */; };
+		DE183DF91BEB4EDC000D4544 /* Data+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */; };
+		DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */; };
+		DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */; };
 		F672EDE71ACB44520020B9BA /* SwiftJWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F672EDE61ACB44520020B9BA /* SwiftJWT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F672EDED1ACB44520020B9BA /* SwiftJWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F672EDE11ACB44520020B9BA /* SwiftJWT.framework */; };
 		F672EDF41ACB44520020B9BA /* JWTTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672EDF31ACB44520020B9BA /* JWTTests.swift */; };
 		F672EDFE1ACB44650020B9BA /* SwiftJWT.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */; };
-		F6C51F921ACB912800B00CF7 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */; };
-		F6C51F991ACB912800B00CF7 /* CommonCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C51F981ACB912800B00CF7 /* CommonCryptoTests.swift */; };
-		F6C51FA71ACBC65400B00CF7 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,37 +25,20 @@
 			remoteGlobalIDString = F672EDE01ACB44520020B9BA;
 			remoteInfo = JWT;
 		};
-		F6C51F931ACB912800B00CF7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F672EDD81ACB44520020B9BA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F6C51F861ACB912800B00CF7;
-			remoteInfo = CommonCrypto;
-		};
-		F6C51FA51ACBC64400B00CF7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F672EDD81ACB44520020B9BA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F6C51F861ACB912800B00CF7;
-			remoteInfo = CommonCrypto;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DE183DF61BEB4EB4000D4544 /* String+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+JWT.swift"; path = "Extensions/String+JWT.swift"; sourceTree = "<group>"; };
+		DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Data+JWT.swift"; path = "Extensions/Data+JWT.swift"; sourceTree = "<group>"; };
+		DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTAssert+JWT.swift"; sourceTree = "<group>"; };
+		DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JWTNaCl.swift; sourceTree = "<group>"; };
 		F672EDE11ACB44520020B9BA /* SwiftJWT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftJWT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672EDE51ACB44520020B9BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F672EDE61ACB44520020B9BA /* SwiftJWT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftJWT.h; sourceTree = "<group>"; };
 		F672EDEC1ACB44520020B9BA /* SwiftJWTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftJWTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672EDF21ACB44520020B9BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F672EDF31ACB44520020B9BA /* JWTTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTTests.swift; sourceTree = "<group>"; };
-		F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftJWT.swift; path = ../../SwiftJWT.swift; sourceTree = "<group>"; };
-		F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonCrypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6C51F8A1ACB912800B00CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F6C51F911ACB912800B00CF7 /* CommonCryptoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonCryptoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6C51F971ACB912800B00CF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F6C51F981ACB912800B00CF7 /* CommonCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonCryptoTests.swift; sourceTree = "<group>"; };
-		F6C51FA01ACB916B00B00CF7 /* CommonCrypto.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = CommonCrypto.xcconfig; sourceTree = "<group>"; };
-		F6C51FA81ACBC67300B00CF7 /* libcommonCrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcommonCrypto.dylib; path = usr/lib/system/libcommonCrypto.dylib; sourceTree = SDKROOT; };
+		F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftJWT.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +46,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6C51FA71ACBC65400B00CF7 /* CommonCrypto.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,31 +57,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F6C51F831ACB912800B00CF7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F6C51F8E1ACB912800B00CF7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F6C51F921ACB912800B00CF7 /* CommonCrypto.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DE183DFA1BEB5CC1000D4544 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				DE183DF61BEB4EB4000D4544 /* String+JWT.swift */,
+				DE183DF81BEB4EDC000D4544 /* Data+JWT.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		F672EDD71ACB44520020B9BA = {
 			isa = PBXGroup;
 			children = (
 				F672EDE31ACB44520020B9BA /* JWT */,
 				F672EDF01ACB44520020B9BA /* JWTTests */,
-				F6C51F881ACB912800B00CF7 /* CommonCrypto */,
-				F6C51F951ACB912800B00CF7 /* CommonCryptoTests */,
 				F672EDE21ACB44520020B9BA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,8 +83,6 @@
 			children = (
 				F672EDE11ACB44520020B9BA /* SwiftJWT.framework */,
 				F672EDEC1ACB44520020B9BA /* SwiftJWTTests.xctest */,
-				F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */,
-				F6C51F911ACB912800B00CF7 /* CommonCryptoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,6 +92,8 @@
 			children = (
 				F672EDE61ACB44520020B9BA /* SwiftJWT.h */,
 				F672EDFD1ACB44650020B9BA /* SwiftJWT.swift */,
+				DE183DFD1BEB774D000D4544 /* JWTNaCl.swift */,
+				DE183DFA1BEB5CC1000D4544 /* Extensions */,
 				F672EDE41ACB44520020B9BA /* Supporting Files */,
 			);
 			path = JWT;
@@ -136,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				F672EDF31ACB44520020B9BA /* JWTTests.swift */,
+				DE183DFB1BEB61AD000D4544 /* XCTAssert+JWT.swift */,
 				F672EDF11ACB44520020B9BA /* Supporting Files */,
 			);
 			path = JWTTests;
@@ -145,41 +121,6 @@
 			isa = PBXGroup;
 			children = (
 				F672EDF21ACB44520020B9BA /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		F6C51F881ACB912800B00CF7 /* CommonCrypto */ = {
-			isa = PBXGroup;
-			children = (
-				F6C51FA81ACBC67300B00CF7 /* libcommonCrypto.dylib */,
-				F6C51F891ACB912800B00CF7 /* Supporting Files */,
-			);
-			path = CommonCrypto;
-			sourceTree = "<group>";
-		};
-		F6C51F891ACB912800B00CF7 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				F6C51F8A1ACB912800B00CF7 /* Info.plist */,
-				F6C51FA01ACB916B00B00CF7 /* CommonCrypto.xcconfig */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		F6C51F951ACB912800B00CF7 /* CommonCryptoTests */ = {
-			isa = PBXGroup;
-			children = (
-				F6C51F981ACB912800B00CF7 /* CommonCryptoTests.swift */,
-				F6C51F961ACB912800B00CF7 /* Supporting Files */,
-			);
-			path = CommonCryptoTests;
-			sourceTree = "<group>";
-		};
-		F6C51F961ACB912800B00CF7 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				F6C51F971ACB912800B00CF7 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -195,13 +136,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F6C51F841ACB912800B00CF7 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -209,6 +143,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F672EDF71ACB44520020B9BA /* Build configuration list for PBXNativeTarget "SwiftJWT" */;
 			buildPhases = (
+				AEC84E66214D7FDB00867631 /* Run Script: CommonCrypto */,
 				F672EDDC1ACB44520020B9BA /* Sources */,
 				F672EDDD1ACB44520020B9BA /* Frameworks */,
 				F672EDDE1ACB44520020B9BA /* Headers */,
@@ -217,7 +152,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				F6C51FA61ACBC64400B00CF7 /* PBXTargetDependency */,
 			);
 			name = SwiftJWT;
 			productName = JWT;
@@ -242,62 +176,23 @@
 			productReference = F672EDEC1ACB44520020B9BA /* SwiftJWTTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		F6C51F861ACB912800B00CF7 /* CommonCrypto */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F6C51F9E1ACB912800B00CF7 /* Build configuration list for PBXNativeTarget "CommonCrypto" */;
-			buildPhases = (
-				F6C51F821ACB912800B00CF7 /* Sources */,
-				F6C51F831ACB912800B00CF7 /* Frameworks */,
-				F6C51F841ACB912800B00CF7 /* Headers */,
-				F6C51F851ACB912800B00CF7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = CommonCrypto;
-			productName = CommonCrypto;
-			productReference = F6C51F871ACB912800B00CF7 /* CommonCrypto.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		F6C51F901ACB912800B00CF7 /* CommonCryptoTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F6C51F9F1ACB912800B00CF7 /* Build configuration list for PBXNativeTarget "CommonCryptoTests" */;
-			buildPhases = (
-				F6C51F8D1ACB912800B00CF7 /* Sources */,
-				F6C51F8E1ACB912800B00CF7 /* Frameworks */,
-				F6C51F8F1ACB912800B00CF7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				F6C51F941ACB912800B00CF7 /* PBXTargetDependency */,
-			);
-			name = CommonCryptoTests;
-			productName = CommonCryptoTests;
-			productReference = F6C51F911ACB912800B00CF7 /* CommonCryptoTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		F672EDD81ACB44520020B9BA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastSwiftUpdateCheck = 0710;
+				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "RoundZero bv";
 				TargetAttributes = {
 					F672EDE01ACB44520020B9BA = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 0810;
 					};
 					F672EDEB1ACB44520020B9BA = {
 						CreatedOnToolsVersion = 6.2;
-					};
-					F6C51F861ACB912800B00CF7 = {
-						CreatedOnToolsVersion = 6.2;
-					};
-					F6C51F901ACB912800B00CF7 = {
-						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 0810;
 					};
 				};
 			};
@@ -315,8 +210,6 @@
 			targets = (
 				F672EDE01ACB44520020B9BA /* SwiftJWT */,
 				F672EDEB1ACB44520020B9BA /* SwiftJWTTests */,
-				F6C51F861ACB912800B00CF7 /* CommonCrypto */,
-				F6C51F901ACB912800B00CF7 /* CommonCryptoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -336,28 +229,38 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F6C51F851ACB912800B00CF7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F6C51F8F1ACB912800B00CF7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AEC84E66214D7FDB00867631 /* Run Script: CommonCrypto */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script: CommonCrypto";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "../Build-Phases/common-crypto.sh\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F672EDDC1ACB44520020B9BA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE183DF91BEB4EDC000D4544 /* Data+JWT.swift in Sources */,
+				DE183DF71BEB4EB4000D4544 /* String+JWT.swift in Sources */,
 				F672EDFE1ACB44650020B9BA /* SwiftJWT.swift in Sources */,
+				DE183DFE1BEB774D000D4544 /* JWTNaCl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,21 +269,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F672EDF41ACB44520020B9BA /* JWTTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F6C51F821ACB912800B00CF7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F6C51F8D1ACB912800B00CF7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F6C51F991ACB912800B00CF7 /* CommonCryptoTests.swift in Sources */,
+				DE183DFC1BEB61AD000D4544 /* XCTAssert+JWT.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,16 +280,6 @@
 			isa = PBXTargetDependency;
 			target = F672EDE01ACB44520020B9BA /* SwiftJWT */;
 			targetProxy = F672EDEE1ACB44520020B9BA /* PBXContainerItemProxy */;
-		};
-		F6C51F941ACB912800B00CF7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F6C51F861ACB912800B00CF7 /* CommonCrypto */;
-			targetProxy = F6C51F931ACB912800B00CF7 /* PBXContainerItemProxy */;
-		};
-		F6C51FA61ACBC64400B00CF7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F6C51F861ACB912800B00CF7 /* CommonCrypto */;
-			targetProxy = F6C51FA51ACBC64400B00CF7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -413,21 +292,33 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -459,13 +350,23 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -474,6 +375,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -483,6 +385,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -493,6 +396,7 @@
 		F672EDF81ACB44520020B9BA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -500,18 +404,17 @@
 				INFOPLIST_FILE = JWT/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/system",
-				);
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
 		F672EDF91ACB44520020B9BA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -519,116 +422,36 @@
 				INFOPLIST_FILE = JWT/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/system",
-				);
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWT;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
 		F672EDFB1ACB44520020B9BA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = JWTTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
 		F672EDFC1ACB44520020B9BA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				INFOPLIST_FILE = JWTTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "nl.roundzero.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = SwiftJWTTests;
-			};
-			name = Release;
-		};
-		F6C51F9A1ACB912800B00CF7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F6C51FA01ACB916B00B00CF7 /* CommonCrypto.xcconfig */;
-			buildSettings = {
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CommonCrypto/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/system",
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Debug;
-		};
-		F6C51F9B1ACB912800B00CF7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = F6C51FA01ACB916B00B00CF7 /* CommonCrypto.xcconfig */;
-			buildSettings = {
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = CommonCrypto/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/system",
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
-		F6C51F9C1ACB912800B00CF7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CommonCryptoTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		F6C51F9D1ACB912800B00CF7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = CommonCryptoTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -658,24 +481,6 @@
 			buildConfigurations = (
 				F672EDFB1ACB44520020B9BA /* Debug */,
 				F672EDFC1ACB44520020B9BA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F6C51F9E1ACB912800B00CF7 /* Build configuration list for PBXNativeTarget "CommonCrypto" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F6C51F9A1ACB912800B00CF7 /* Debug */,
-				F6C51F9B1ACB912800B00CF7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F6C51F9F1ACB912800B00CF7 /* Build configuration list for PBXNativeTarget "CommonCryptoTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F6C51F9C1ACB912800B00CF7 /* Debug */,
-				F6C51F9D1ACB912800B00CF7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

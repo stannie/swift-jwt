@@ -1,4 +1,4 @@
-# swift-jwt
+# swift-jwt (ARCHIVED)
 Swift Framework for JWT (JSON Web Token)
 
 Created for Authentiq ID
